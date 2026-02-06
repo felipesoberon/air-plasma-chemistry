@@ -50,9 +50,9 @@ void globalmodel::setParametersFromCommandLineInput(int numberOfArguments, char*
 
   if (relativeChangeMinLimit <= 0.0 || relativeChangeMaxLimit <= 0.0 || relativeChangeMinLimit >= relativeChangeMaxLimit)
     {
-      cout << "WARNING: invalid adaptive metric limits; resetting to defaults (0.05, 0.10)." << endl;
-      relativeChangeMinLimit = 0.05;
-      relativeChangeMaxLimit = 0.10;
+      cout << "WARNING: invalid adaptive metric limits; resetting to defaults (0.01, 0.05)." << endl;
+      relativeChangeMinLimit = 0.01;
+      relativeChangeMaxLimit = 0.05;
     }
 
   cout << endl;

@@ -34,8 +34,8 @@ class globalmodel
   unsigned long stepCount = 0;
   double dt = 50E-12;
   bool adaptiveDtEnabled = true;
-  double relativeChangeMinLimit = 0.05;
-  double relativeChangeMaxLimit = 0.10;
+  double relativeChangeMinLimit = 0.01;
+  double relativeChangeMaxLimit = 0.05;
   double lastMaxRelativeChange = 0.0;
   double simulationTime = 0;
   double lastSavedSimulationTime = -1;
