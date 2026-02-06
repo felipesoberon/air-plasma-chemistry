@@ -53,7 +53,7 @@ Fixed dt:
 
 Notes:
 - If `output.csv` exists, the solver resumes from its last data row.
-- Species density floor is `1e-20` in the current C++ model.
+- Species density floor is `10 m^-3` in the current C++ model.
 
 ## Python interface
 
