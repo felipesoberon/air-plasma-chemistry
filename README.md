@@ -48,8 +48,8 @@ If `output.csv` exists, the simulation resumes from it; otherwise it begins with
 
 ### Requirements
 
-- Python 3.10+ (tested in WSL with `python3`)
-- No third-party packages required
+- Python 3.10+
+- `matplotlib` (install via `requirements.txt` for GUI support)
 
 ### Run
 
@@ -74,6 +74,42 @@ python -m python.main -Te 2.45 -totaltime 1E-5
 ```
 
 The Python version reads and appends `output.csv` with the same schema and column order as C++.
+
+### GUI
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Launch the GUI:
+
+```bash
+python -m python.gui
+```
+
+GUI features:
+- Two-pane layout:
+- Left pane: model inputs and controls
+- Right pane: live species concentration plot
+- Inputs exposed in GUI:
+- `Te [eV]`
+- `Total time [s]`
+- `RH [%]` (H2O density is computed internally at fixed `T=298 K`, `P=101325 Pa`)
+- Adaptive timestep limits:
+- `Metric min` (default `0.05`)
+- `Metric max` (default `0.5`)
+- Runtime controls:
+- `Start`, `Stop`, `Reset`
+- Live indicators:
+- simulation time `t`
+- max relative concentration change (`max rel dC/C`)
+- current timestep `dt`
+- Plot behavior:
+- log scale on both axes
+- zoom/pan via Matplotlib toolbar
+- species visibility via `Show all species` and per-species checkboxes
 
 ## Results
 

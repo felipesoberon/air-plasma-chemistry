@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
+from typing import Callable
 
 from .commandline import CommandLine
 from .constants import EV_TO_KELVIN, NO_REACTIONS, NO_SPECIES, SPECIES_CONTAINING_H
@@ -26,6 +27,10 @@ class GlobalModel:
         self.last_saved_simulation_time = -1.0
         self.plasma_time = 1e-9
         self.total_time = 1e-6
+        self.last_max_relative_change = 0.0
+        self.relative_change_min_limit = 0.05
+        self.relative_change_max_limit = 0.5
+        self.adaptive_dt_enabled = True
 
         self.command_line = CommandLine()
 
@@ -166,30 +171,60 @@ class GlobalModel:
                 aux_source += reaction_rate * aux_density * multiplier
                 self.species[i].set_source(aux_source)
 
-    def process_time_step_species_densities(self) -> None:
+    def process_time_step_species_densities(self) -> float:
+        max_relative_change = 0.0
         for i in range(1, 51):
             if self.species[i].return_loss() > 0.0 or self.species[i].return_source() > 0.0:
+                current_density = self.species[i].return_density()
                 sources_minus_losses = self.species[i].return_source() - self.species[i].return_loss()
-                aux_density = sources_minus_losses * self.dt
+                delta_density = sources_minus_losses * self.dt
+
+                if current_density > 0.0:
+                    relative_change = abs(delta_density / current_density)
+                    if relative_change > max_relative_change:
+                        max_relative_change = relative_change
 
                 if (
                     sources_minus_losses > 0.0
-                    and aux_density > self.species[i].return_density()
-                    and self.species[i].return_density() > 1e5
+                    and delta_density > current_density
+                    and current_density > 1e5
                 ):
                     print(
                         f"WARNING: species [{self.species[i].return_formula()}] > x2 density at time {self.simulation_time}"
                     )
 
-                aux_density = self.species[i].return_density() + aux_density
+                aux_density = current_density + delta_density
                 if sources_minus_losses != 0.0:
                     self.species[i].set_density(aux_density)
+
+        self.last_max_relative_change = max_relative_change
+        return max_relative_change
+
+    def update_dt_from_relative_change_metric(self, max_relative_change: float) -> None:
+        if not self.adaptive_dt_enabled:
+            return
+        if max_relative_change > self.relative_change_max_limit:
+            self.dt *= 0.5
+        elif max_relative_change < self.relative_change_min_limit:
+            self.dt *= 2.0
 
     @staticmethod
     def _fmt_float(value: float) -> str:
         return f"{value:.6g}"
 
-    def process_main_loop(self) -> None:
+    def _write_output_row(self, dumpfile) -> list[float]:
+        densities = [self.species[i].return_density() for i in range(1, NO_SPECIES + 1)]
+        row = [self._fmt_float(value) for value in densities]
+        row.append(self._fmt_float(self.simulation_time))
+        row.append(str(self.step_count))
+        dumpfile.write(",".join(row) + "\n")
+        return densities
+
+    def process_main_loop(
+        self,
+        stop_requested: Callable[[], bool] | None = None,
+        on_saved_row: Callable[[float, int, list[float]], None] | None = None,
+    ) -> None:
         output_path = Path("output.csv")
         with output_path.open("a", encoding="utf-8") as dumpfile:
             if self.simulation_time == 0.0:
@@ -198,6 +233,8 @@ class GlobalModel:
 
             print(f"\nPLASMA PULSE: (duration = {self.plasma_time})")
             while True:
+                if stop_requested is not None and stop_requested():
+                    break
                 if self.simulation_time >= self.total_time or self.simulation_time >= 10.0 * self.plasma_time:
                     break
 
@@ -205,17 +242,17 @@ class GlobalModel:
                 self.set_reaction_rates()
 
                 self.process_balance_equations()
-                self.process_time_step_species_densities()
+                max_relative_change = self.process_time_step_species_densities()
+                self.update_dt_from_relative_change_metric(max_relative_change)
 
                 if (
                     self.step_count % self.return_save_interval_step() == 0
                     and self.simulation_time > self.last_saved_simulation_time
                 ):
-                    row = [self._fmt_float(self.species[i].return_density()) for i in range(1, NO_SPECIES + 1)]
-                    row.append(self._fmt_float(self.simulation_time))
-                    row.append(str(self.step_count))
-                    dumpfile.write(",".join(row) + "\n")
+                    densities = self._write_output_row(dumpfile)
                     print(f"{self.simulation_time}\t{self.step_count}\t{self.electron_temperature_kelvin}")
+                    if on_saved_row is not None:
+                        on_saved_row(self.simulation_time, self.step_count, densities)
 
                 self.simulation_time += self.dt
                 self.step_count += 1
@@ -225,21 +262,23 @@ class GlobalModel:
 
             print("\nAFTERGLOW:\n")
             while True:
+                if stop_requested is not None and stop_requested():
+                    break
                 if self.simulation_time >= self.total_time:
                     break
 
                 self.process_balance_equations()
-                self.process_time_step_species_densities()
+                max_relative_change = self.process_time_step_species_densities()
+                self.update_dt_from_relative_change_metric(max_relative_change)
 
                 if (
                     self.step_count % self.return_save_interval_step() == 0
                     and self.simulation_time > self.last_saved_simulation_time
                 ):
-                    row = [self._fmt_float(self.species[i].return_density()) for i in range(1, NO_SPECIES + 1)]
-                    row.append(self._fmt_float(self.simulation_time))
-                    row.append(str(self.step_count))
-                    dumpfile.write(",".join(row) + "\n")
+                    densities = self._write_output_row(dumpfile)
                     print(f"{self.simulation_time}\t{self.step_count}\t{self.electron_temperature_kelvin}")
+                    if on_saved_row is not None:
+                        on_saved_row(self.simulation_time, self.step_count, densities)
 
                 self.simulation_time += self.dt
                 self.step_count += 1
@@ -286,7 +325,7 @@ class GlobalModel:
         with path.open("r", encoding="utf-8") as file:
             for line in file:
                 line = line.strip()
-                if len(line) > 50:
+                if len(line) > 50 and not line.startswith("#"):
                     data_line = line
 
         if not data_line:
@@ -296,7 +335,10 @@ class GlobalModel:
         for token in data_line.split(","):
             token = token.strip()
             if token:
-                values.append(float(token))
+                try:
+                    values.append(float(token))
+                except ValueError:
+                    return
             if len(values) >= NO_SPECIES + 2:
                 break
 
