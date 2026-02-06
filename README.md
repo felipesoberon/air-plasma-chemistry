@@ -1,13 +1,16 @@
 # airGM
 
-A zero-dimensional plasma chemistry model for humid air discharge at atmospheric pressure. The code tracks 53 species and 624 reactions derived from the work of Sakiyama et al. (2012).
+A zero-dimensional plasma chemistry model for humid air discharge at atmospheric pressure. The model tracks 53 species and 624 reactions derived from Sakiyama et al. (2012).
 
 ## Directory structure
-- `src/` – C++ source (version 2.1)
-- `documentation/` – detailed README in Org/HTML and a TODO list
-- `results/` – example scripts, output data and gnuplot plotting files
+- `src/` - C++ source (version 2.1)
+- `python/` - Python port of the model
+- `documentation/` - detailed README in Org/HTML and a TODO list
+- `results/` - example scripts, output data and gnuplot plotting files
 
-## Build
+## C++ version
+
+### Build
 
 Requires `make` and a C++11 compiler (tested with GCC g++). From the `src` directory:
 
@@ -17,7 +20,7 @@ sudo make install    # optional
 make clean           # remove build artifacts
 ```
 
-## Usage
+### Run
 
 Run the executable:
 
@@ -40,6 +43,37 @@ Example:
 ```
 
 If `output.csv` exists, the simulation resumes from it; otherwise it begins with default values (1 ms, 2.6 eV, 50 ps, [H2O] = 1.2E24 m^-3).
+
+## Python version
+
+### Requirements
+
+- Python 3.10+ (tested in WSL with `python3`)
+- No third-party packages required
+
+### Run
+
+From the repository root:
+
+```bash
+python -m python.main [options]
+```
+
+The Python CLI matches the C++ flags:
+
+- `-totaltime <s>`    total simulation time
+- `-Te <eV>`          peak electron temperature
+- `-dt <s>`           time step
+- `-[H2O] <m^-3>`     water concentration
+- `-plasmatime <s>`   plasma pulse duration
+
+Example:
+
+```bash
+python -m python.main -Te 2.45 -totaltime 1E-5
+```
+
+The Python version reads and appends `output.csv` with the same schema and column order as C++.
 
 ## Results
 

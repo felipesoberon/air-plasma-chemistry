@@ -1,0 +1,14 @@
+# C++ build artifacts
+src/*.o
+src/airGM2.1
+
+# Simulation outputs
+output.csv
+compare/
+
+# Local helper scripts
+compare_run.sh
+
+# Python cache files
+python/__pycache__/
+python/*.pyc
