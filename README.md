@@ -50,6 +50,7 @@ If `output.csv` exists, the simulation resumes from it; otherwise it begins with
 
 - Python 3.10+
 - `matplotlib` (install via `requirements.txt` for GUI support)
+- WSL with C++ build tools (`g++`, `make`) for backend execution
 
 ### Run
 
@@ -59,21 +60,24 @@ From the repository root:
 python -m python.main [options]
 ```
 
-The Python CLI matches the C++ flags:
+This is a wrapper that launches the C++ solver (`src/airGM2.1`) in WSL. CLI flags are forwarded to C++.
+
+Common flags:
 
 - `-totaltime <s>`    total simulation time
 - `-Te <eV>`          peak electron temperature
 - `-dt <s>`           time step
-- `-[H2O] <m^-3>`     water concentration
+- `-RH <percent>`     relative humidity (preferred)
+- `-[H2O] <m^-3>`     water concentration (alternative)
 - `-plasmatime <s>`   plasma pulse duration
+- `-metricmin <value>` adaptive dt lower bound
+- `-metricmax <value>` adaptive dt upper bound
 
 Example:
 
 ```bash
-python -m python.main -Te 2.45 -totaltime 1E-5
+python -m python.main -Te 2.45 -totaltime 1E-5 -RH 50
 ```
-
-The Python version reads and appends `output.csv` with the same schema and column order as C++.
 
 ### GUI
 
@@ -93,19 +97,22 @@ GUI features:
 - Two-pane layout:
 - Left pane: model inputs and controls
 - Right pane: live species concentration plot
+- Backend:
+- The GUI launches the C++ solver (`src/airGM2.1`) through WSL and reads `output.csv` live
+- WSL with build tools is required (`g++`, `make`)
 - Inputs exposed in GUI:
 - `Te [eV]`
 - `Total time [s]`
-- `RH [%]` (H2O density is computed internally at fixed `T=298 K`, `P=101325 Pa`)
+- `RH [%]` (uses C++ `-RH` option)
 - Adaptive timestep limits:
 - `Metric min` (default `0.05`)
-- `Metric max` (default `0.5`)
+- `Metric max` (default `0.10`)
 - Runtime controls:
 - `Start`, `Stop`, `Reset`
 - Live indicators:
 - simulation time `t`
-- max relative concentration change (`max rel dC/C`)
-- current timestep `dt`
+- max relative concentration change (`max rel dC/C`) estimated between saved rows
+- timestep `dt` estimated between saved rows
 - Plot behavior:
 - log scale on both axes
 - zoom/pan via Matplotlib toolbar

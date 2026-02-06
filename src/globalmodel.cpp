@@ -10,9 +10,12 @@ void globalmodel::setParametersFromCommandLineInput(int numberOfArguments, char*
 
   commandLine.setFlagName("-Te", "Electron temperature in eV");
   commandLine.setFlagName("-[H2O]", "Density of water in m-3");
+  commandLine.setFlagName("-RH", "Relative humidity in %");
   commandLine.setFlagName("-totaltime", "Total simulation time is s");
   commandLine.setFlagName("-plasmatime", "Plasma pulse time in s");
   commandLine.setFlagName("-dt","Simulation time step in s");
+  commandLine.setFlagName("-metricmin","Adaptive dt lower relative-change limit");
+  commandLine.setFlagName("-metricmax","Adaptive dt upper relative-change limit");
   commandLine.printFlagNameList();
 
   commandLine.setFlagValues();
@@ -23,15 +26,34 @@ void globalmodel::setParametersFromCommandLineInput(int numberOfArguments, char*
   
   if (commandLine.flagValueIsNumber(1))
     setH2ODensity( commandLine.returnFloatFlagValue(1) );
-  
+
   if (commandLine.flagValueIsNumber(2))
-    totalTime =  commandLine.returnFloatFlagValue(2);
+    setH2ODensity( returnH2ODensityFromRelativeHumidityPercent(commandLine.returnFloatFlagValue(2)) );
   
   if (commandLine.flagValueIsNumber(3))
-    plasmaTime =  commandLine.returnFloatFlagValue(3);
-
+    totalTime =  commandLine.returnFloatFlagValue(3);
+  
   if (commandLine.flagValueIsNumber(4))
-    dt =  commandLine.returnFloatFlagValue(4);
+    plasmaTime =  commandLine.returnFloatFlagValue(4);
+
+  if (commandLine.flagValueIsNumber(5))
+    {
+      dt =  commandLine.returnFloatFlagValue(5);
+      adaptiveDtEnabled = false;
+    }
+
+  if (commandLine.flagValueIsNumber(6))
+    relativeChangeMinLimit = commandLine.returnFloatFlagValue(6);
+
+  if (commandLine.flagValueIsNumber(7))
+    relativeChangeMaxLimit = commandLine.returnFloatFlagValue(7);
+
+  if (relativeChangeMinLimit <= 0.0 || relativeChangeMaxLimit <= 0.0 || relativeChangeMinLimit >= relativeChangeMaxLimit)
+    {
+      cout << "WARNING: invalid adaptive metric limits; resetting to defaults (0.05, 0.10)." << endl;
+      relativeChangeMinLimit = 0.05;
+      relativeChangeMaxLimit = 0.10;
+    }
 
   cout << endl;
  }
@@ -88,6 +110,25 @@ void globalmodel::setNO2Density(double densityValue)
 
 void globalmodel::setO3Density(double densityValue)
 { SPECIES[36].setDensity( densityValue ); }
+
+double globalmodel::returnSaturationPressurePaAtTemperatureKelvin(double temperatureValueKelvin)
+{
+  // Tetens approximation (water over liquid), valid near room conditions.
+  double temperatureValueCelsius = temperatureValueKelvin - 273.15;
+  return 610.94 * exp( (17.625 * temperatureValueCelsius) / (temperatureValueCelsius + 243.04) );
+}
+
+double globalmodel::returnH2ODensityFromRelativeHumidityPercent(double relativeHumidityPercent)
+{
+  constexpr double BoltzmannConstant = 1.380649E-23;
+  double relativeHumidityFraction = relativeHumidityPercent / 100.0;
+  if (relativeHumidityFraction < 0.0) relativeHumidityFraction = 0.0;
+  if (relativeHumidityFraction > 1.0) relativeHumidityFraction = 1.0;
+
+  double saturationPressurePa = returnSaturationPressurePaAtTemperatureKelvin(gasTemperatureKelvin);
+  double h2oPartialPressurePa = relativeHumidityFraction * saturationPressurePa;
+  return h2oPartialPressurePa / (BoltzmannConstant * gasTemperatureKelvin);
+}
 
 
 void globalmodel::setElectronTemperatureeV(double temperatureValueeV)
@@ -276,10 +317,14 @@ void globalmodel::processBalanceEquations(void)
 
 
 
-void globalmodel::processTimeStepSpeciesDensities(void)
+double globalmodel::processTimeStepSpeciesDensities(void)
 {
   int i;
   double SourcesMinusLosses;
+  double currentDensity;
+  double deltaDensity;
+  double relativeChange;
+  double maxRelativeChange = 0.0;
   double auxDensity;
   
   /*Run over all species, except N2, O2, H2O*/
@@ -287,10 +332,17 @@ void globalmodel::processTimeStepSpeciesDensities(void)
     {
       if ( SPECIES[i].returnLoss() >0 || SPECIES[i].returnSource() >0) 
 	{ 
+	  currentDensity = SPECIES[i].returnDensity();
 	  SourcesMinusLosses = SPECIES[i].returnSource() - SPECIES[i].returnLoss();
-	  auxDensity = SourcesMinusLosses * dt;
+	  deltaDensity = SourcesMinusLosses * dt;
+
+	  if (currentDensity > 0.0)
+	    {
+	      relativeChange = fabs(deltaDensity/currentDensity);
+	      if (relativeChange > maxRelativeChange) maxRelativeChange = relativeChange;
+	    }
 	  
-	  if (SourcesMinusLosses>0 && auxDensity>SPECIES[i].returnDensity() && SPECIES[i].returnDensity()>1E5)
+	  if (SourcesMinusLosses>0 && deltaDensity>currentDensity && currentDensity>1E5)
 	    {
 	      cout << "WARNING: species [";
 	      cout << SPECIES[i].returnFormula();
@@ -299,12 +351,15 @@ void globalmodel::processTimeStepSpeciesDensities(void)
 	      cout << endl;
 	    }
 	  
-	  auxDensity = SPECIES[i].returnDensity() + auxDensity;
+	  auxDensity = currentDensity + deltaDensity;
 	  
 	  if (SourcesMinusLosses != 0.0) 
 	    { SPECIES[i].setDensity( auxDensity ); }
 	}
     }//for i (run over species)
+
+  lastMaxRelativeChange = maxRelativeChange;
+  return maxRelativeChange;
 }
 
 
@@ -313,9 +368,20 @@ void globalmodel::processTimeStepSpeciesDensities(void)
 
 
 
+void globalmodel::updateDtFromRelativeChangeMetric(double maxRelativeChange)
+{
+  if (!adaptiveDtEnabled) return;
+  if (maxRelativeChange > relativeChangeMaxLimit) dt = dt * 0.5;
+  else if (maxRelativeChange < relativeChangeMinLimit) dt = dt * 2.0;
+}
+
+
+
+
 void globalmodel::processMainLoop(void)
 {
   int i;
+  double maxRelativeChange;
   ofstream dumpfile;             
   dumpfile.open("output.csv", ios_base::app);	
   
@@ -341,7 +407,8 @@ void globalmodel::processMainLoop(void)
       setReactionRates();		
       
       processBalanceEquations();
-      processTimeStepSpeciesDensities();
+      maxRelativeChange = processTimeStepSpeciesDensities();
+      updateDtFromRelativeChangeMetric(maxRelativeChange);
       
       if ( stepCount % returnSaveIntervalStep() == 0 && simulationTime > lastSavedSimulationTime ) 
 	{
@@ -367,7 +434,8 @@ void globalmodel::processMainLoop(void)
       if (simulationTime >= totalTime) break;
       
       processBalanceEquations();
-      processTimeStepSpeciesDensities();
+      maxRelativeChange = processTimeStepSpeciesDensities();
+      updateDtFromRelativeChangeMetric(maxRelativeChange);
       
       if ( stepCount % returnSaveIntervalStep() == 0 && simulationTime > lastSavedSimulationTime ) 
 	{

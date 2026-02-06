@@ -33,6 +33,10 @@ class globalmodel
 
   unsigned long stepCount = 0;
   double dt = 50E-12;
+  bool adaptiveDtEnabled = true;
+  double relativeChangeMinLimit = 0.05;
+  double relativeChangeMaxLimit = 0.10;
+  double lastMaxRelativeChange = 0.0;
   double simulationTime = 0;
   double lastSavedSimulationTime = -1;
   double plasmaTime = 1E-9;
@@ -50,6 +54,8 @@ class globalmodel
   void setH2ODensity(double);
   void setNO2Density(double);
   void setO3Density(double);
+  double returnSaturationPressurePaAtTemperatureKelvin(double);
+  double returnH2ODensityFromRelativeHumidityPercent(double);
   
   void setElectronTemperatureeV(double);
   void setElectronTemperatureKelvin(double);
@@ -59,7 +65,8 @@ class globalmodel
   void setReactionReactantAndProductSpecies(void);
   void setBalanceEquations(void);
   void processBalanceEquations(void);
-  void processTimeStepSpeciesDensities(void);
+  double processTimeStepSpeciesDensities(void);
+  void updateDtFromRelativeChangeMetric(double);
   
   void processMainLoop(void);
   

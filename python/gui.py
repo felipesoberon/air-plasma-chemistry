@@ -1,50 +1,53 @@
-"""Tkinter GUI for the airGM Python model."""
+"""Tkinter GUI that runs the C++ airGM solver and plots output.csv live."""
 
 from __future__ import annotations
 
 import math
-import queue
-import threading
+import shlex
+import subprocess
 import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox, ttk
 
+from matplotlib import colormaps
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from matplotlib import cm
 from matplotlib.figure import Figure
 
-from .constants import EV_TO_KELVIN, NO_SPECIES, SPECIES_FORMULAS
-from .globalmodel import GlobalModel
+from .constants import NO_SPECIES, SPECIES_FORMULAS
 
-BOLTZMANN_CONSTANT = 1.380649e-23
-DEFAULT_GAS_TEMPERATURE_K = 298.0
-DEFAULT_PRESSURE_PA = 101325.0
 DEFAULT_PLASMA_TIME_S = 1e-9
+SUM_POSITIVE_IONS_KEY = 1001
+SUM_NEGATIVE_IONS_KEY = 1002
+POSITIVE_ION_INDICES = tuple(range(1, 17))
+NEGATIVE_ION_INDICES = tuple(range(18, 28))
 
 
 class AirGMGui:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("airGM GUI")
+        self.root.title("airGM GUI (C++ backend)")
         self.root.geometry("1400x900")
 
-        self.model_thread: threading.Thread | None = None
-        self.stop_event = threading.Event()
-        self.data_queue: queue.Queue = queue.Queue()
-        self.running = False
+        self.repo_root = Path(__file__).resolve().parent.parent
+        self.output_csv_path = self.repo_root / "output.csv"
 
-        self.times: list[float] = []
+        self.process: subprocess.Popen | None = None
+        self.running = False
+        self.last_csv_mtime: float | None = None
+        self.last_csv_size: int | None = None
+
         self.plot_times: list[float] = []
         self.plot_data: dict[int, list[float]] = {i: [] for i in range(1, NO_SPECIES + 1)}
+        self.plot_data[SUM_POSITIVE_IONS_KEY] = []
+        self.plot_data[SUM_NEGATIVE_IONS_KEY] = []
 
         self.lines = {}
         self.species_vars: dict[int, tk.BooleanVar] = {}
-        self.pending_points = 0
 
         self._build_layout()
         self._init_plot()
         self._set_defaults()
-        self._schedule_queue_poll()
+        self._schedule_poll()
 
     def _build_layout(self) -> None:
         paned = ttk.PanedWindow(self.root, orient=tk.HORIZONTAL)
@@ -73,7 +76,7 @@ class AirGMGui:
         self.show_all_var = tk.BooleanVar(value=False)
         self.current_time_var = tk.StringVar(value="t = 0 s")
         self.current_metric_var = tk.StringVar(value="max rel dC/C = 0")
-        self.current_dt_var = tk.StringVar(value="dt = 5e-11 s")
+        self.current_dt_var = tk.StringVar(value="dt = n/a")
 
         self._add_labeled_entry(inputs, 0, "Te [eV]", self.te_var)
         self._add_labeled_entry(inputs, 1, "Total time [s]", self.total_time_var)
@@ -89,15 +92,9 @@ class AirGMGui:
         ttk.Button(controls, text="Stop", command=self._stop).pack(side=tk.LEFT, padx=(0, 6))
         ttk.Button(controls, text="Reset", command=self._reset).pack(side=tk.LEFT)
 
-        ttk.Label(inputs, textvariable=self.current_time_var).grid(
-            row=7, column=0, columnspan=2, sticky="w", pady=(6, 0)
-        )
-        ttk.Label(inputs, textvariable=self.current_metric_var).grid(
-            row=8, column=0, columnspan=2, sticky="w", pady=(2, 0)
-        )
-        ttk.Label(inputs, textvariable=self.current_dt_var).grid(
-            row=9, column=0, columnspan=2, sticky="w", pady=(2, 0)
-        )
+        ttk.Label(inputs, textvariable=self.current_time_var).grid(row=7, column=0, columnspan=2, sticky="w", pady=(6, 0))
+        ttk.Label(inputs, textvariable=self.current_metric_var).grid(row=8, column=0, columnspan=2, sticky="w", pady=(2, 0))
+        ttk.Label(inputs, textvariable=self.current_dt_var).grid(row=9, column=0, columnspan=2, sticky="w", pady=(2, 0))
 
         self.status_var = tk.StringVar(value="Idle")
         ttk.Label(inputs, textvariable=self.status_var).grid(row=10, column=0, columnspan=2, sticky="w", pady=(6, 0))
@@ -138,6 +135,22 @@ class AirGMGui:
                 command=self._update_line_visibility,
             ).grid(row=(i - 1) // columns, column=(i - 1) % columns, sticky="w", padx=(0, 8), pady=1)
 
+        next_row = (NO_SPECIES - 1) // columns + 1
+        self.species_vars[SUM_POSITIVE_IONS_KEY] = tk.BooleanVar(value=False)
+        self.species_vars[SUM_NEGATIVE_IONS_KEY] = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            grid_body,
+            text="SUM + ions",
+            variable=self.species_vars[SUM_POSITIVE_IONS_KEY],
+            command=self._update_line_visibility,
+        ).grid(row=next_row, column=0, sticky="w", padx=(0, 8), pady=3)
+        ttk.Checkbutton(
+            grid_body,
+            text="SUM - ions",
+            variable=self.species_vars[SUM_NEGATIVE_IONS_KEY],
+            command=self._update_line_visibility,
+        ).grid(row=next_row, column=1, sticky="w", padx=(0, 8), pady=3)
+
     def _build_plot_panel(self, parent: ttk.Frame) -> None:
         self.figure = Figure(figsize=(10, 7), dpi=100)
         self.ax = self.figure.add_subplot(111)
@@ -157,11 +170,17 @@ class AirGMGui:
         self.toolbar.update()
 
     def _init_plot(self) -> None:
-        colors = cm.get_cmap("tab20")
+        colors = colormaps["tab20"]
         for i in range(1, NO_SPECIES + 1):
             color = colors((i - 1) % 20)
             line, = self.ax.plot([], [], linewidth=1.0, color=color, label=SPECIES_FORMULAS[i])
             self.lines[i] = line
+        self.lines[SUM_POSITIVE_IONS_KEY], = self.ax.plot(
+            [], [], linewidth=1.8, linestyle="--", color="black", label="SUM + ions"
+        )
+        self.lines[SUM_NEGATIVE_IONS_KEY], = self.ax.plot(
+            [], [], linewidth=1.8, linestyle=":", color="dimgray", label="SUM - ions"
+        )
         self._update_line_visibility()
         self.canvas.draw_idle()
 
@@ -170,7 +189,7 @@ class AirGMGui:
         self.total_time_var.set("1e-6")
         self.rh_var.set("50")
         self.metric_min_var.set("0.05")
-        self.metric_max_var.set("0.5")
+        self.metric_max_var.set("0.10")
 
     def _toggle_show_all(self) -> None:
         value = self.show_all_var.get()
@@ -186,41 +205,193 @@ class AirGMGui:
             if visible:
                 visible_count += 1
 
-        if visible_count != NO_SPECIES:
-            self.show_all_var.set(False)
-        elif visible_count == NO_SPECIES:
-            self.show_all_var.set(True)
-
+        self.show_all_var.set(visible_count == len(self.lines))
         self._autoscale_axes()
         self.canvas.draw_idle()
 
-    def _compute_saturation_pressure_pa(self, temperature_k: float) -> float:
-        # Tetens approximation (water over liquid), valid near room conditions.
-        temp_c = temperature_k - 273.15
-        return 610.94 * math.exp((17.625 * temp_c) / (temp_c + 243.04))
+    @staticmethod
+    def _windows_path_to_wsl(path: Path) -> str:
+        drive = path.drive.rstrip(":").lower()
+        tail = path.as_posix().split(":", 1)[1]
+        return f"/mnt/{drive}{tail}"
 
-    def _rh_to_density(self, rh: float, temperature_k: float) -> float:
-        rh_fraction = max(0.0, min(100.0, rh)) / 100.0
-        p_sat = self._compute_saturation_pressure_pa(temperature_k)
-        p_h2o = rh_fraction * p_sat
-        return p_h2o / (BOLTZMANN_CONSTANT * temperature_k)
+    def _collect_inputs(self) -> dict[str, float] | None:
+        try:
+            te = float(self.te_var.get())
+            total_time = float(self.total_time_var.get())
+            rh = float(self.rh_var.get())
+            metric_min = float(self.metric_min_var.get())
+            metric_max = float(self.metric_max_var.get())
+        except ValueError:
+            messagebox.showerror("Invalid input", "Please provide numeric values for all model inputs.")
+            return None
+
+        if metric_min <= 0.0 or metric_max <= 0.0 or metric_min >= metric_max:
+            messagebox.showerror("Invalid limits", "Require 0 < metric min < metric max.")
+            return None
+
+        return {
+            "te": te,
+            "total_time": total_time,
+            "rh": max(0.0, min(100.0, rh)),
+            "metric_min": metric_min,
+            "metric_max": metric_max,
+        }
+
+    def _start(self) -> None:
+        if self.running:
+            return
+
+        params = self._collect_inputs()
+        if params is None:
+            return
+
+        repo_wsl = self._windows_path_to_wsl(self.repo_root)
+        args = [
+            "./src/airGM2.1",
+            "-Te",
+            f"{params['te']}",
+            "-totaltime",
+            f"{params['total_time']}",
+            "-plasmatime",
+            f"{DEFAULT_PLASMA_TIME_S}",
+            "-RH",
+            f"{params['rh']}",
+            "-metricmin",
+            f"{params['metric_min']}",
+            "-metricmax",
+            f"{params['metric_max']}",
+        ]
+        quoted_args = " ".join(shlex.quote(item) for item in args)
+        bash_cmd = (
+            f"cd {shlex.quote(repo_wsl)} && "
+            f"if [ ! -x ./src/airGM2.1 ]; then (cd src && make); fi && "
+            f"{quoted_args}"
+        )
+
+        try:
+            self.process = subprocess.Popen(
+                ["wsl.exe", "--", "bash", "-lc", bash_cmd],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except FileNotFoundError:
+            messagebox.showerror("WSL not found", "wsl.exe is required to run the C++ backend from this GUI.")
+            return
+
+        self.running = True
+        self.status_var.set("Running (C++ backend)")
+
+    def _stop(self) -> None:
+        if self.process is None:
+            return
+
+        self.status_var.set("Stopping...")
+        self.process.terminate()
+        try:
+            self.process.wait(timeout=2.0)
+        except subprocess.TimeoutExpired:
+            self.process.kill()
+        self.process = None
+        self.running = False
+        self.status_var.set("Stopped")
+
+    def _reset(self) -> None:
+        self._stop()
+        if self.output_csv_path.exists():
+            self.output_csv_path.unlink()
+        self.last_csv_mtime = None
+        self.last_csv_size = None
+        self._clear_plot_data()
+        self.status_var.set("Reset complete")
 
     def _clear_plot_data(self) -> None:
-        self.times.clear()
         self.plot_times.clear()
-        for i in range(1, NO_SPECIES + 1):
-            self.plot_data[i].clear()
-            self.lines[i].set_data([], [])
-        self.pending_points = 0
+        for key in self.lines:
+            self.plot_data[key].clear()
+            self.lines[key].set_data([], [])
+
         self.current_time_var.set("t = 0 s")
         self.current_metric_var.set("max rel dC/C = 0")
-        self.current_dt_var.set("dt = 5e-11 s")
+        self.current_dt_var.set("dt = n/a")
+        self._autoscale_axes()
+        self.canvas.draw_idle()
+
+    def _load_csv_rows(self) -> list[list[float]]:
+        rows: list[list[float]] = []
+        if not self.output_csv_path.exists():
+            return rows
+
+        with self.output_csv_path.open("r", encoding="utf-8") as file:
+            for line in file:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                rows.append([float(x) for x in line.split(",") if x != ""])
+
+        return rows
+
+    def _refresh_from_csv(self) -> None:
+        if not self.output_csv_path.exists():
+            return
+
+        stat = self.output_csv_path.stat()
+        if self.last_csv_mtime == stat.st_mtime and self.last_csv_size == stat.st_size:
+            return
+        self.last_csv_mtime = stat.st_mtime
+        self.last_csv_size = stat.st_size
+
+        rows = self._load_csv_rows()
+        if not rows:
+            return
+
+        self.plot_times.clear()
+        for key in self.lines:
+            self.plot_data[key].clear()
+
+        for row in rows:
+            time_s = row[53]
+            if time_s <= 0:
+                continue
+            self.plot_times.append(time_s)
+            for i in range(1, NO_SPECIES + 1):
+                value = row[i - 1]
+                self.plot_data[i].append(value if value > 0 else math.nan)
+            pos_sum = sum(row[i - 1] for i in POSITIVE_ION_INDICES)
+            neg_sum = sum(row[i - 1] for i in NEGATIVE_ION_INDICES)
+            self.plot_data[SUM_POSITIVE_IONS_KEY].append(pos_sum if pos_sum > 0 else math.nan)
+            self.plot_data[SUM_NEGATIVE_IONS_KEY].append(neg_sum if neg_sum > 0 else math.nan)
+
+        for key in self.lines:
+            self.lines[key].set_data(self.plot_times, self.plot_data[key])
+
+        last = rows[-1]
+        current_time = last[53]
+        self.current_time_var.set(f"t = {current_time:.6g} s")
+
+        if len(rows) >= 2:
+            prev = rows[-2]
+            dt_saved = last[53] - prev[53]
+            if dt_saved > 0:
+                self.current_dt_var.set(f"dt = {dt_saved:.3e} s (saved)")
+
+            max_rel = 0.0
+            for idx in range(53):
+                prev_value = prev[idx]
+                if prev_value > 0.0:
+                    rel = abs((last[idx] - prev_value) / prev_value)
+                    if rel > max_rel:
+                        max_rel = rel
+            self.current_metric_var.set(f"max rel dC/C = {max_rel:.3e} (saved)")
+        else:
+            self.current_metric_var.set("max rel dC/C = 0")
+            self.current_dt_var.set("dt = n/a")
+
         self._autoscale_axes()
         self.canvas.draw_idle()
 
     def _autoscale_axes(self) -> None:
-        has_points = len(self.plot_times) > 0
-        if not has_points:
+        if not self.plot_times:
             self.ax.set_xlim(1e-12, 1e-3)
             self.ax.set_ylim(1e-3, 1e26)
             return
@@ -233,17 +404,16 @@ class AirGMGui:
 
         y_min = float("inf")
         y_max = 0.0
-        for i in range(1, NO_SPECIES + 1):
-            if not self.lines[i].get_visible():
+        for key in self.lines:
+            if not self.lines[key].get_visible():
                 continue
-            for y in self.plot_data[i]:
+            for y in self.plot_data[key]:
                 if not math.isnan(y) and y > 0:
                     y_min = min(y_min, y)
                     y_max = max(y_max, y)
 
         if y_min == float("inf"):
             y_min, y_max = 1e-3, 1e26
-
         if y_min == y_max:
             y_min *= 0.9
             y_max *= 1.1
@@ -251,134 +421,22 @@ class AirGMGui:
         self.ax.set_xlim(x_min, x_max)
         self.ax.set_ylim(y_min, y_max)
 
-    def _collect_inputs(self) -> dict[str, float] | None:
-        try:
-            return {
-                "te_ev": float(self.te_var.get()),
-                "total_time": float(self.total_time_var.get()),
-                "rh_percent": float(self.rh_var.get()),
-                "metric_min": float(self.metric_min_var.get()),
-                "metric_max": float(self.metric_max_var.get()),
-            }
-        except ValueError:
-            messagebox.showerror("Invalid input", "Please provide numeric values for all model inputs.")
-            return None
+    def _poll(self) -> None:
+        self._refresh_from_csv()
 
-    def _start(self) -> None:
-        if self.running:
-            return
-
-        params = self._collect_inputs()
-        if params is None:
-            return
-        if params["metric_min"] <= 0.0 or params["metric_max"] <= 0.0 or params["metric_min"] >= params["metric_max"]:
-            messagebox.showerror("Invalid limits", "Require 0 < metric min < metric max.")
-            return
-
-        self.stop_event.clear()
-        self.running = True
-        self.status_var.set("Running")
-
-        model = GlobalModel()
-        model.set_species_formula()
-        model.set_default_species_densities()
-
-        model.peak_electron_temperature_kelvin = params["te_ev"] * EV_TO_KELVIN
-        model.total_time = params["total_time"]
-        model.plasma_time = DEFAULT_PLASMA_TIME_S
-        model.set_gas_temperature_kelvin(DEFAULT_GAS_TEMPERATURE_K)
-        model.set_h2o_density(self._rh_to_density(params["rh_percent"], DEFAULT_GAS_TEMPERATURE_K))
-        model.relative_change_min_limit = params["metric_min"]
-        model.relative_change_max_limit = params["metric_max"]
-
-        model.read_species_density_data_file()
-        model.set_reaction_rates()
-        model.set_reaction_reactant_and_product_species()
-        model.set_balance_equations()
-
-        self.model_thread = threading.Thread(target=self._run_model, args=(model,), daemon=True)
-        self.model_thread.start()
-
-    def _run_model(self, model: GlobalModel) -> None:
-        try:
-            model.process_main_loop(
-                stop_requested=self.stop_event.is_set,
-                on_saved_row=lambda t, step, dens: self.data_queue.put(
-                    ("row", t, step, dens, model.last_max_relative_change, model.dt)
-                ),
-            )
-            self.data_queue.put(("done",))
-        except Exception as exc:  # pragma: no cover - UI runtime guard
-            self.data_queue.put(("error", str(exc)))
-
-    def _stop(self) -> None:
-        if self.running:
-            self.stop_event.set()
-            self.status_var.set("Stopping...")
-
-    def _reset(self) -> None:
-        self._stop()
-        if self.model_thread is not None and self.model_thread.is_alive():
-            self.model_thread.join(timeout=2.0)
-
-        output_path = Path("output.csv")
-        if output_path.exists():
-            output_path.unlink()
-
-        self._clear_plot_data()
-        self.status_var.set("Reset complete")
-
-    def _append_point(
-        self, time_s: float, densities: list[float], max_relative_change: float, dt: float
-    ) -> None:
-        self.times.append(time_s)
-        self.current_time_var.set(f"t = {time_s:.6g} s")
-        self.current_metric_var.set(f"max rel dC/C = {max_relative_change:.3e}")
-        self.current_dt_var.set(f"dt = {dt:.3e} s")
-        if time_s <= 0:
-            return
-
-        self.plot_times.append(time_s)
-        for i in range(1, NO_SPECIES + 1):
-            value = densities[i - 1]
-            self.plot_data[i].append(value if value > 0 else math.nan)
-
-        for i in range(1, NO_SPECIES + 1):
-            self.lines[i].set_data(self.plot_times, self.plot_data[i])
-
-        self.pending_points += 1
-
-    def _drain_queue(self) -> None:
-        refreshed = False
-        while True:
-            try:
-                item = self.data_queue.get_nowait()
-            except queue.Empty:
-                break
-
-            kind = item[0]
-            if kind == "row":
-                _, time_s, _step_no, densities, max_relative_change, dt = item
-                self._append_point(time_s, densities, max_relative_change, dt)
-                refreshed = True
-            elif kind == "done":
+        if self.process is not None and self.running:
+            code = self.process.poll()
+            if code is not None:
                 self.running = False
-                self.status_var.set("Completed")
-                refreshed = True
-            elif kind == "error":
-                self.running = False
-                self.status_var.set("Error")
-                messagebox.showerror("Simulation error", item[1])
-                refreshed = True
+                self.process = None
+                if code == 0:
+                    self.status_var.set("Completed")
+                else:
+                    self.status_var.set(f"C++ process failed (exit {code})")
 
-        if refreshed and self.pending_points > 0:
-            self._autoscale_axes()
-            self.canvas.draw_idle()
-            self.pending_points = 0
-
-    def _schedule_queue_poll(self) -> None:
-        self._drain_queue()
-        self.root.after(100, self._schedule_queue_poll)
+    def _schedule_poll(self) -> None:
+        self._poll()
+        self.root.after(200, self._schedule_poll)
 
 
 def main() -> None:

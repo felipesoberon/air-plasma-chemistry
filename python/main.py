@@ -1,47 +1,38 @@
-"""Python entry point for airGM port."""
+"""CLI wrapper that runs the C++ airGM solver via WSL."""
 
 from __future__ import annotations
 
+import shlex
+import subprocess
 import sys
+from pathlib import Path
 
-from .globalmodel import GlobalModel
 
-
-def print_program_description() -> None:
-    print("**********************************************")
-    print("*                                            *")
-    print("* Felipe Soberon (felipe.soberon@gmail.com)  *")
-    print("* 2023                                       *")
-    print("*                                            *")
-    print("* Global_Model_2.1 of atmospheric pressure   *")
-    print("* plasma discharge in (humid) air;           *")
-    print("* using Sakiyama et al., 2012 reaction data. *")
-    print("*                                            *")
-    print("**********************************************")
-    print("Usage:")
-    print("$ airGM2.1 <-flag> <flag value>")
+def windows_path_to_wsl(path: Path) -> str:
+    drive = path.drive.rstrip(":").lower()
+    tail = path.as_posix().split(":", 1)[1]
+    return f"/mnt/{drive}{tail}"
 
 
 def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv
 
-    print_program_description()
+    repo_root = Path(__file__).resolve().parent.parent
+    repo_wsl = windows_path_to_wsl(repo_root)
+    solver_args = " ".join(shlex.quote(token) for token in argv[1:])
+    bash_cmd = (
+        f"cd {shlex.quote(repo_wsl)} && "
+        f"if [ ! -x ./src/airGM2.1 ]; then (cd src && make); fi && "
+        f"./src/airGM2.1 {solver_args}"
+    )
 
-    microdischarge_model = GlobalModel()
-
-    microdischarge_model.set_species_formula()
-    microdischarge_model.set_default_species_densities()
-    microdischarge_model.set_parameters_from_command_line_input(argv)
-
-    microdischarge_model.read_species_density_data_file()
-
-    microdischarge_model.set_reaction_rates()
-    microdischarge_model.set_reaction_reactant_and_product_species()
-    microdischarge_model.set_balance_equations()
-
-    microdischarge_model.process_main_loop()
-    return 0
+    try:
+        completed = subprocess.run(["wsl.exe", "--", "bash", "-lc", bash_cmd], check=False)
+    except FileNotFoundError:
+        print("ERROR: wsl.exe not found. Install WSL to run the C++ backend from Python.")
+        return 1
+    return int(completed.returncode)
 
 
 if __name__ == "__main__":
