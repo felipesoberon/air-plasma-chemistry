@@ -13,7 +13,7 @@ class species
   const static int maxNoReactions = 624; 
   string formula;
   double density;
-  constexpr static double minimumDensity = 1.0E-3;
+  constexpr static double minimumDensity = 1.0E-20;
   double loss;
   double source;
 

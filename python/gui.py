@@ -185,11 +185,11 @@ class AirGMGui:
         self.canvas.draw_idle()
 
     def _set_defaults(self) -> None:
-        self.te_var.set("2.6")
-        self.total_time_var.set("1e-6")
+        self.te_var.set("5.5")
+        self.total_time_var.set("1")
         self.rh_var.set("50")
-        self.metric_min_var.set("0.05")
-        self.metric_max_var.set("0.10")
+        self.metric_min_var.set("0.01")
+        self.metric_max_var.set("0.05")
 
     def _toggle_show_all(self) -> None:
         value = self.show_all_var.get()
