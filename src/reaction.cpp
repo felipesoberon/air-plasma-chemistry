@@ -2421,7 +2421,7 @@ double reaction::reactionRateFunction(int j, double Tgas, double Telectron)
 		break;
 		
 		case 599 :
-		result = 1E-19 * exp(-11000/Tg) * pow( (300/Tg), 3.5);
+		result = 1E-9 * exp(-11000/Tg) * pow( (300/Tg), 3.5);
 		break;
 		
 		case 600 :
@@ -3451,8 +3451,7 @@ void reaction::setReactantAndProductSpecies(int j)
 		reactantSpeciesList[0] = 2;
 		reactantSpeciesList[1] = 20; //O3-
 		reactantSpeciesList[2] = 36; //O3
-		reactantSpeciesList[3] = 4;
-		productSpeciesList[0] = 4; 
+		productSpeciesList[0] = 4;
 		productSpeciesList[1] = 52; //O2
 		productSpeciesList[2] = 52; //O2
 		productSpeciesList[3] = 52; //O2
@@ -3968,7 +3967,7 @@ void reaction::setReactantAndProductSpecies(int j)
 		case 150:       
 		reactantSpeciesList[0] = 2;
 		reactantSpeciesList[1] = 4;  //N4+
-		reactantSpeciesList[2] = 51; //N
+		reactantSpeciesList[2] = 51; //N2
 		productSpeciesList[0] = 3;
 		productSpeciesList[1] = 2;  //N2+
 		productSpeciesList[2] = 51; //N2
