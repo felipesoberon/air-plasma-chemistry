@@ -19,7 +19,7 @@ class globalmodel
  private:
 
   const static int NoSpecies = 53;
-  const static int NoReactions = 624;
+  const static int NoReactions = 673;
 
   species SPECIES[NoSpecies+1];
   reaction REACTION[NoReactions+1];

@@ -1,0 +1,104 @@
+BOLSIG+ script file: 01_input/bolsig_input.txt
+READCOLLISIONS
+H2O
+01_input\Morgan.txt
+C1    H2O    Attachment                                         
+C2    H2O    Attachment                                         
+C3    H2O    Attachment                                         
+C4    H2O    Effective (momentum)                               
+C5    H2O    Excitation    0.20 eV                              
+C6    H2O    Excitation    0.43 eV                              
+C7    H2O    Excitation    0.43 eV                              
+C8    H2O    Excitation    13.00 eV                             
+C9    H2O    Excitation    7.00 eV                              
+C10   H2O    Ionization    13.00 eV                             
+READCOLLISIONS
+N2
+01_input\IST-Lisbon.txt
+C11   N2    Effective (momentum)                                
+C12   N2    Excitation    0.30 eV                               
+C13   N2    Excitation    0.60 eV                               
+C14   N2    Excitation    0.90 eV                               
+C15   N2    Excitation    1.10 eV                               
+C16   N2    Excitation    1.40 eV                               
+C17   N2    Excitation    1.70 eV                               
+C18   N2    Excitation    11.00 eV                              
+C19   N2    Excitation    11.80 eV                              
+C20   N2    Excitation    12.20 eV                              
+C21   N2    Excitation    13.00 eV                              
+C22   N2    Excitation    2.00 eV                               
+C23   N2    Excitation    2.20 eV                               
+C24   N2    Excitation    2.50 eV                               
+C25   N2    Excitation    2.70 eV                               
+C26   N2    Excitation    6.20 eV                               
+C27   N2    Excitation    7.00 eV                               
+C28   N2    Excitation    7.40 eV                               
+C29   N2    Excitation    7.40 eV                               
+C30   N2    Excitation    7.80 eV                               
+C31   N2    Excitation    8.20 eV                               
+C32   N2    Excitation    8.40 eV                               
+C33   N2    Excitation    8.60 eV                               
+C34   N2    Excitation    8.90 eV                               
+C35   N2    Ionization    15.60 eV                              
+C36   N2    Ionization    18.80 eV                              
+READCOLLISIONS
+O2
+01_input\IST-Lisbon.txt
+C37   O2    Attachment                                          
+C38   O2    Effective (momentum)                                
+C39   O2    Excitation    0.19 eV                               
+C40   O2    Excitation    0.38 eV                               
+C41   O2    Excitation    0.60 eV                               
+C42   O2    Excitation    0.80 eV                               
+C43   O2    Excitation    0.98 eV                               
+C44   O2    Excitation    1.63 eV                               
+C45   O2    Excitation    14.70 eV                              
+C46   O2    Excitation    4.50 eV                               
+C47   O2    Excitation    6.00 eV                               
+C48   O2    Excitation    8.40 eV                               
+C49   O2    Excitation    9.97 eV                               
+C50   O2    Ionization    12.10 eV                              
+RUNSERIES
+R1    0.295 Td    0.100 eV                                      
+R2    4.72 Td    0.444 eV                                       
+R3    9.13 Td    0.787 eV                                       
+R4    40.1 Td    1.13 eV   Extrapolated                         
+R5    62.9 Td    1.47 eV   Extrapolated                         
+R6    75.2 Td    1.82 eV   Extrapolated                         
+R7    85.6 Td    2.16 eV   Extrapolated                         
+R8    95.4 Td    2.51 eV   Extrapolated                         
+R9    105. Td    2.85 eV   Extrapolated                         
+R10   115. Td    3.19 eV   Extrapolated                         
+R11   126. Td    3.54 eV   Extrapolated                         
+R12   137. Td    3.88 eV   Extrapolated                         
+R13   150. Td    4.22 eV   Extrapolated                         
+R14   163. Td    4.57 eV   Extrapolated                         
+R15   178. Td    4.91 eV   Extrapolated                         
+R16   194. Td    5.25 eV   Extrapolated                         
+R17   211. Td    5.60 eV   Extrapolated                         
+R18   230. Td    5.94 eV   Extrapolated                         
+R19   249. Td    6.28 eV   Extrapolated                         
+R20   270. Td    6.63 eV   Extrapolated                         
+R21   291. Td    6.97 eV   Extrapolated                         
+R22   313. Td    7.32 eV   Extrapolated                         
+R23   336. Td    7.66 eV   Extrapolated                         
+R24   359. Td    8.00 eV   Extrapolated                         
+R25   383. Td    8.35 eV   Extrapolated                         
+R26   407. Td    8.69 eV   Extrapolated                         
+R27   432. Td    9.03 eV   Extrapolated                         
+R28   457. Td    9.38 eV   Extrapolated                         
+R29   482. Td    9.72 eV   Extrapolated                         
+R30   508. Td    10.1 eV   Extrapolated                         
+R31   533. Td    10.4 eV   Extrapolated                         
+R32   559. Td    10.8 eV   Extrapolated                         
+R33   585. Td    11.1 eV   Extrapolated                         
+R34   612. Td    11.4 eV   Extrapolated                         
+R35   638. Td    11.8 eV   Extrapolated                         
+R36   664. Td    12.1 eV   Extrapolated                         
+R37   691. Td    12.5 eV   Extrapolated                         
+R38   717. Td    12.8 eV   Extrapolated                         
+R39   744. Td    13.2 eV   Extrapolated                         
+R40   771. Td    13.5 eV   Extrapolated                         
+SAVERESULTS
+02_output\results_Peng.dat
+FINISHED

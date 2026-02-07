@@ -144,6 +144,9 @@ void globalmodel::setGasTemperatureKelvin(double temperatureValue)
 
 void globalmodel::setReactionRates(void)
 {
+  if (!reaction::bolsigLoaded)
+    reaction::loadBolsigTable("bolsigplus072024-win/02_output/rates_Peng.csv");
+
   int j;
   for (j=1;  j<=NoReactions; j++)
     {

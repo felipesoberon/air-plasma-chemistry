@@ -1,0 +1,102 @@
+================================================================================
+  Plan: Computing reaction rates with BOLSIG+ (bolsigminus)
+  For Peng et al. (2022) reactions R625-R673
+  Plasma Sci. Technol. 24 (2022) 055404
+================================================================================
+
+DATABASE SELECTION
+================================================================================
+
+- H2O: Morgan database (IST-Lisbon does not include H2O)
+- N2:  IST-Lisbon database (validated against swarm parameters, preferred)
+- O2:  IST-Lisbon database (validated against swarm parameters, preferred)
+
+STEP 1: Create bolsigminus input script
+================================================================================
+
+Create file "bolsig_input.txt" in 01_input folder with:
+
+1. READCOLLISIONS from "01_input\Morgan.txt"      -> species H2O
+2. READCOLLISIONS from "01_input\IST-Lisbon.txt"  -> species N2
+3. READCOLLISIONS from "01_input\IST-Lisbon.txt"  -> species O2
+
+4. CONDITIONS:
+   - Gas temperature: 298 K
+   - Excitation temperature: 298 K (enables superelastic collisions)
+   - Gas composition: 0.0156 (H2O) : 0.7686 (N2) : 0.2062 (O2)
+     (order matches species loading order)
+   - Gas particle density: 2.46e25 m^-3
+   - Standard numerical settings:
+     - 200 grid points
+     - Precision: 1e-10
+     - Convergence: 1e-4
+     - Max iterations: 1000
+
+5. RUNSERIES sweeping mean electron energy from 0.1 to 13.5 eV, 40 steps
+   - Variable = 2 (Mean energy)
+   - Type = 1 (Linear)
+   - This range covers Te up to 9 eV (Te = 2/3 * mean_energy)
+   - Conversion: Te (eV) = (2/3) * mean_energy (eV)
+   - BOLSIG+ finds the E/N that produces each target mean energy
+     and solves the full Boltzmann equation (non-Maxwellian EEDF)
+
+6. SAVERESULTS to "02_output\results_Peng.dat"
+   - Format = 5 (Energy): output indexed by mean electron energy
+   - Includes: conditions, transport coefficients, rate coefficients
+
+STEP 2: Run bolsigminus
+================================================================================
+
+Execute from the bolsigplus072024-win directory:
+  bolsigminus.exe 01_input\bolsig_input.txt
+
+Note: Use backslashes in file paths within the script, as forward
+slashes are interpreted as comment delimiters by BOLSIG+.
+
+STEP 3: Verify output
+================================================================================
+
+- Check "bolsiglog.txt" for errors
+- Confirm rate coefficients are produced for all 50 collision processes
+- Results saved in "02_output\results_Peng.dat"
+- Use "02_output\C_to_Peng_mapping.txt" to identify which BOLSIG+
+  C-number corresponds to which Peng reaction (R625-R673)
+
+STEP 4: Post-process for C++ code
+================================================================================
+
+- Pre-process results_Peng.dat into a clean CSV with columns labeled
+  by Peng reaction number, using the C-to-Peng mapping
+- In C++ code, read the CSV and use linear interpolation on
+  k(mean_energy) to get rate coefficients at any electron temperature
+
+NOTES
+================================================================================
+
+1. IST-Lisbon is preferred for N2 and O2 because their cross section sets
+   are validated against measured swarm parameters (agreement within 1-20%
+   for E/N ~ 1e-4 to 500 Td). Morgan is used for H2O because it is the
+   only available source with complete H2O cross sections on LXCat matching
+   the Peng et al. reaction set. N2 and O2 data from Morgan will NOT be
+   loaded to avoid duplication.
+
+2. Gas conditions represent atmospheric humid air at 25 C and 50% relative
+   humidity:
+   - Pressure: 1 atm (101.325 kPa)
+   - Temperature: 298 K (25 C)
+   - H2O partial pressure: 50% x 3.17 kPa (saturation at 25 C) = 1.585 kPa
+   - Mole fractions: N2 = 0.7686, O2 = 0.2062, H2O = 0.0156
+   - Gas particle density: n = P/(kB*T) = 101325/(1.381e-23 * 298)
+                              = 2.46e25 m^-3
+
+3. IST-Lisbon does not include rotational cross sections in the main set.
+   Missing Peng reactions: R635 (N2 rotational), R662 (O2 rotational),
+   R664 (2nd O2 vibrational at 0.19 eV). These are minor at E/N > 1 Td.
+   R632 (inverse of R631) has no separate cross section; use detailed
+   balance.
+
+4. The output contains 50 collision processes (C1-C50), of which 43 map
+   directly to Peng reactions R625-R673. Six extra processes from the
+   databases (C3, C8, C24, C25, C41, C42) are also included.
+
+================================================================================

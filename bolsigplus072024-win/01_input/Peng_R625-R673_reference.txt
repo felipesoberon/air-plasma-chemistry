@@ -1,0 +1,187 @@
+================================================================================
+  Peng et al. (2022) - Reactions R625-R673
+  Cross section data from LXCat (IST-Lisbon / Morgan databases)
+  Reference: Plasma Sci. Technol. 24 (2022) 055404
+  LXCat Ref [21]: www.lxcat.net
+================================================================================
+
+All 49 reactions (R625-R673) use rate coefficients computed from electron-impact
+collision cross sections via a Boltzmann solver (BOLSIG+).
+These reactions replace/supplement those in the Sakiyama et al. (2012) model.
+
+================================================================================
+  H2O REACTIONS (R625-R633) -- Source: Morgan database
+================================================================================
+
+R625  e + H2O -> H2 + O-           ATTACHMENT: H2O -> H2+O^-
+R626  e + H2O -> OH + H-           ATTACHMENT: H2O -> H^-+OH
+                                    (Morgan also has: H2O -> OH^-+H)
+R627  e + H2O -> e + H2O           EFFECTIVE:  H2O  (elastic/momentum transfer)
+R628  e + H2O -> e + H2O           EXCITATION: H2O -> H2O(V2)  (0.20 eV)
+R629  e + H2O -> e + H2O           EXCITATION: H2O -> H2O(V1)  (0.43 eV)
+R630  e + H2O -> e + H2O           EXCITATION: H2O -> H2O(V3)  (0.43 eV)
+R631  e + H2O -> e + H + OH        EXCITATION: H2O -> H+OH     (7.0 eV dissoc.)
+R632  e + H + OH -> e + H2O        Inverse of R631 (superelastic process;
+                                    use BOLSIG+ detailed balance / "<->" option)
+R633  e + H2O -> 2e + H2O+         IONIZATION: H2O -> H2O^+    (12.61 eV)
+
+Note: Morgan also has EXCITATION: H2O -> O*+H2 (13 eV) which is not
+explicitly listed in Peng's table but is available.
+
+================================================================================
+  N2 REACTIONS (R634-R659) -- Source: Morgan (or IST-Lisbon) database
+================================================================================
+
+--- Elastic / Vibrational / Rotational (R634-R644) ---
+    These 11 reactions are all written as "e + N2 -> e + N2" without
+    specifying the excited state. Assignment based on Morgan threshold order.
+
+R634  e + N2 -> e + N2             EFFECTIVE:  N2  (elastic/momentum transfer)
+R635  e + N2 -> e + N2             EXCITATION: N2 -> N2*        (0.02 eV, rot.)
+R636  e + N2 -> e + N2             EXCITATION: N2 -> N2(V1)     (0.29 eV)
+R637  e + N2 -> e + N2             EXCITATION: N2 -> N2(V1)     (0.291 eV)
+R638  e + N2 -> e + N2             EXCITATION: N2 -> N2(V2)     (0.59 eV)
+R639  e + N2 -> e + N2             EXCITATION: N2 -> N2(V3)     (0.88 eV)
+R640  e + N2 -> e + N2             EXCITATION: N2 -> N2(V4)     (1.17 eV)
+R641  e + N2 -> e + N2             EXCITATION: N2 -> N2(V5)     (1.47 eV)
+R642  e + N2 -> e + N2             EXCITATION: N2 -> N2(V6)     (1.76 eV)
+R643  e + N2 -> e + N2             EXCITATION: N2 -> N2(V7)     (2.06 eV)
+R644  e + N2 -> e + N2             EXCITATION: N2 -> N2(V8)     (2.35 eV)
+
+--- Electronic excitation - Triplet states (R645-R650) ---
+    State labels taken directly from Table A1 image.
+
+R645  e + N2 -> e + N2(A 3Sigma)   EXCITATION: N2 -> N2*        (6.17 eV)
+R646  e + N2 -> e + N2(A 3Sigma)   EXCITATION: N2 -> N2*        (7.00 eV)
+R647  e + N2 -> e + N2(B 3Pi)      EXCITATION: N2 -> N2*        (7.35 eV)
+R648  e + N2 -> e + N2(w 3Delta)   EXCITATION: N2 -> N2*        (7.36 eV)
+R649  e + N2 -> e + N2(A 3Sigma)   EXCITATION: N2 -> N2*        (7.80 eV)
+R650  e + N2 -> e + N2(B'3Sigma)   EXCITATION: N2 -> N2*        (8.16 eV)
+
+    NOTE: R645, R646, R649 all labeled "A 3Sigma" in the paper. These likely
+    correspond to three distinct excitation channels in the Morgan database
+    at 6.17, 7.00, and 7.80 eV respectively. The 7.00 and 7.80 eV entries
+    may represent different vibronic bands or cascade contributions to the
+    A 3Sigma state.
+
+--- Electronic excitation - Singlet states (R651-R653) ---
+
+R651  e + N2 -> e + N2(A'1Sigma)   EXCITATION: N2 -> N2*        (8.40 eV)
+R652  e + N2 -> e + N2(A 1Pi)      EXCITATION: N2 -> N2*        (8.55 eV)
+R653  e + N2 -> e + N2(w 1Delta)   EXCITATION: N2 -> N2*        (8.89 eV)
+
+--- Higher electronic excitation and dissociation (R654-R657) ---
+
+R654  e + N2 -> e + N2(C 3Pi_u)    EXCITATION: N2 -> N2*        (11.03 eV)
+R655  e + N2 -> e + N2(e 3Sigma)   EXCITATION: N2 -> N2*        (11.88 eV)
+R656  e + N2 -> e + N2(A'1Sigma)   EXCITATION: N2 -> N2*        (12.25 eV)
+R657  e + N2 -> e + N2 (sing)      EXCITATION: N2 -> N+N        (13.0 eV)
+
+    NOTE on R655: The paper uses lowercase "e" for the state label (e 3Sigma).
+    This is the E 3Sigma_g+ state in standard spectroscopic notation.
+
+    NOTE on R656: Same label "A'1Sigma" as R651, but at higher threshold.
+    Likely a''1Sigma_g+ (12.25 eV) vs a'1Sigma_u- (8.40 eV for R651).
+    The distinction a' vs a'' may be lost in the paper's notation.
+
+    NOTE on R657: Paper labels this "N2 (sing)" meaning sum of higher
+    singlet states or singlet dissociation channel. In Morgan database
+    this maps to the N+N (13.0 eV) dissociation process.
+
+--- Ionization (R658-R659) ---
+
+R658  e + N2 -> 2e + N2+           IONIZATION: N2 -> N2^+       (15.6 eV)
+R659  e + N2 -> 2e + N2+           IONIZATION: N2 -> N2^+       (2nd channel)
+
+    NOTE on R659: Morgan database has ionization from excited states
+    N2(A) -> N2^+ and N2(a) -> N2^+ which may correspond to this
+    second ionization entry, or it may be a second ground-state channel
+    at a different threshold (e.g., 18.8 eV for N+ + N).
+
+================================================================================
+  O2 REACTIONS (R660-R673) -- Source: Morgan (or IST-Lisbon) database
+================================================================================
+
+--- Attachment (R660) ---
+
+R660  e + O2 -> O + O-             ATTACHMENT: O2 -> O2^-
+                                    (dissociative attachment; Morgan lists two
+                                     attachment channels at different energies)
+
+--- Elastic / Vibrational / Rotational (R661-R665) ---
+    These 5 reactions are all written as "e + O2 -> e + O2" without
+    specifying the excited state.
+
+R661  e + O2 -> e + O2             EFFECTIVE:  O2  (elastic/momentum transfer)
+R662  e + O2 -> e + O2             EXCITATION: O2 -> O2(rot)    (0.02 eV)
+R663  e + O2 -> e + O2             EXCITATION: O2 -> O2(V)      (0.19 eV, 1st)
+R664  e + O2 -> e + O2             EXCITATION: O2 -> O2(V)      (0.19 eV, 2nd)
+R665  e + O2 -> e + O2             EXCITATION: O2 -> O2(V)      (0.38 eV)
+
+    NOTE: R665 appears twice in the paper's table (page break artifact).
+    It is a single reaction.
+
+--- Electronic excitation (R666-R672) ---
+
+R666  e + O2 -> e + O2(a 1Delta)   EXCITATION: O2 -> O2*        (0.977 eV)
+R667  e + O2 -> e + O2(b 1Sigma)   EXCITATION: O2 -> O2*        (1.627 eV)
+R668  e + O2 -> e + O2             EXCITATION: O2 -> O2*        (4.5 eV)
+R669  e + O2 -> e + O + O          EXCITATION: O2 -> O2*        (6.0 eV dissoc.)
+R670  e + O2 -> e + O + O(1D)      EXCITATION: O2 -> O2*        (8.4 eV)
+R671  e + O2 -> e + O2             EXCITATION: O2 -> O2*        (9.97 eV)
+R672  e + O2 -> e + O2             EXCITATION: O2 -> O2*        (14.7 eV)
+
+--- Ionization (R673) ---
+
+R673  e + O2 -> 2e + O2+           IONIZATION: O2 -> O2^+       (12.1 eV)
+
+================================================================================
+  SUMMARY COUNT
+================================================================================
+
+  H2O:  9 reactions  (2 attach. + 1 elastic + 3 vib.exc. + 1 dissoc.
+                      + 1 inverse/superelastic + 1 ioniz.)
+  N2:  26 reactions  (1 elastic + 10 vib/rot + 6 triplet + 3 singlet
+                      + 3 higher elec./dissoc. + 1 sum singlet + 2 ioniz.)
+  O2:  14 reactions  (1 attach. + 1 elastic + 4 vib/rot + 2 named elec.
+                      + 1 unlabeled elec. + 2 dissoc. + 2 unlabeled elec.
+                      + 1 ioniz.)
+  TOTAL: 49 reactions
+
+================================================================================
+  NOTES
+================================================================================
+
+1. The exact matching of R634-R644 and R661-R665 (written generically as
+   "e + X -> e + X") to specific vibrational/rotational levels is inferred
+   from the threshold energies in the Morgan database, listed in ascending
+   order. The Peng paper does not specify the thresholds for these.
+
+2. R632 (e + H + OH -> e + H2O) is the inverse (superelastic) process of
+   R631. BOLSIG+ can handle this automatically if the cross section uses
+   the "<->" notation for the target/product states.
+
+3. R659 (second N2 ionization) may correspond to ionization from an excited
+   state [N2(A) or N2(a) -> N2+] available in the Morgan database, or it
+   could be a second ionization channel (e.g., different threshold).
+
+4. R660 in Peng lists "O + O-" (dissociative attachment) while the Morgan
+   database labels it as "O2^-". These may represent different channels;
+   check the specific cross section data for the dissociative product.
+
+5. For BOLSIG+ input, load cross section files as follows:
+   - Morgan.txt:  READCOLLISIONS for H2O (and optionally N2, O2)
+   - IST-Lisbon.txt: READCOLLISIONS for N2 and O2
+   Avoid double-loading N2 and O2 from both databases.
+
+6. State notation in the paper (Table A1 image):
+   - Superscript 3 = triplet, superscript 1 = singlet
+   - A, B, C, E, w = standard N2 electronic state labels
+   - A' likely = a' (lowercase in spectroscopic notation)
+   - "e 3Sigma" (R655) = E 3Sigma_g+ (uppercase E standard)
+   - "sing" (R657) = sum of singlet states or singlet dissociation
+   - "a 1d" (R666) = a 1Delta_g for O2
+   - "b 1s" (R667) = b 1Sigma_g+ for O2
+   - "1D" in O(1D) (R670) = excited oxygen atom O(1D)
+
+================================================================================

@@ -4,7 +4,10 @@
 
 #include <math.h>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <string>
+#include <cstring>
 using namespace std;
 
 
@@ -20,9 +23,22 @@ class reaction
   int productSpeciesList[maxNoReactionSpecies+1];
   
   double reactionRateFunction(int j, double Tgas, double Telectron);
-  
-  
+  double interpolateBolsigRate(int pengReaction, double TeEv);
+
+
  public:
+
+  // Static BOLSIG+ table (shared across all instances)
+  static const int bolsigMaxPoints = 50;
+  static const int bolsigMaxReactions = 50;
+  static bool bolsigLoaded;
+  static int bolsigNPoints;
+  static double bolsigTeEv[bolsigMaxPoints];
+  static double bolsigRate[bolsigMaxPoints][bolsigMaxReactions];
+  static int bolsigNCols;
+  static int bolsigPengCol[674];  // maps Peng# -> CSV column index (-1 if absent)
+
+  static void loadBolsigTable(const char* filename);
   
   reaction(void);
 

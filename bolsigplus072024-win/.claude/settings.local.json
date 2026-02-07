@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(move:*)",
+      "Bash(cmd /c move:*)",
+      "Bash(cmd /c dir \"C:\\\\Users\\\\felip\\\\source\\\\repos\\\\felipesoberon\\\\airGM\" /b)",
+      "Bash(powershell -Command:*)"
+    ]
+  }
+}

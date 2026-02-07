@@ -1,5 +1,13 @@
 #include "reaction.h"
 
+// Static BOLSIG+ table member definitions
+bool reaction::bolsigLoaded = false;
+int reaction::bolsigNPoints = 0;
+double reaction::bolsigTeEv[reaction::bolsigMaxPoints] = {};
+double reaction::bolsigRate[reaction::bolsigMaxPoints][reaction::bolsigMaxReactions] = {};
+int reaction::bolsigNCols = 0;
+int reaction::bolsigPengCol[674] = {};  // initialized in loadBolsigTable
+
 
 reaction::reaction(void)
 {
@@ -9,6 +17,172 @@ reaction::reaction(void)
 		reactantSpeciesList[i] = 0;
 		productSpeciesList[i] = 0;
 	}
+}
+
+
+
+void reaction::loadBolsigTable(const char* filename)
+{
+	// Initialize all mapping entries to -1 (not present)
+	for (int i = 0; i < 674; i++) bolsigPengCol[i] = -1;
+
+	ifstream file(filename);
+	if (!file.is_open())
+	{
+		cout << "WARNING: Could not open BOLSIG+ rates file: " << filename << endl;
+		bolsigLoaded = false;
+		return;
+	}
+
+	// Parse header row
+	string headerLine;
+	getline(file, headerLine);
+	stringstream hss(headerLine);
+	string token;
+	int colIndex = 0;
+	bolsigNCols = 0;
+
+	while (getline(hss, token, ','))
+	{
+		// Remove whitespace/carriage returns
+		while (!token.empty() && (token.back() == '\r' || token.back() == ' '))
+			token.pop_back();
+
+		// Check if token starts with 'R' followed by digits
+		if (token.length() > 1 && token[0] == 'R')
+		{
+			int pengNum = 0;
+			bool valid = true;
+			// Handle tokens like "R653_C18" by only parsing digits after 'R'
+			size_t k = 1;
+			while (k < token.length() && token[k] >= '0' && token[k] <= '9') k++;
+			if (k > 1)
+			{
+				pengNum = atoi(token.substr(1, k-1).c_str());
+				if (pengNum >= 625 && pengNum <= 673)
+				{
+					// Only store the first occurrence (skip duplicates like R653_C18)
+					if (bolsigPengCol[pengNum] == -1)
+					{
+						bolsigPengCol[pengNum] = bolsigNCols;
+						bolsigNCols++;
+					}
+					else
+					{
+						// This is a duplicate column (e.g. R653_C18 after R653)
+						// Store it as additional column but don't overwrite mapping
+						bolsigNCols++;
+					}
+				}
+			}
+		}
+		colIndex++;
+	}
+
+	// Re-parse header to build a column-to-bolsigRate-index mapping
+	// We need to know which data column maps to which bolsigRate column
+	int totalDataCols = colIndex;
+	int* dataColToBolsigCol = new int[totalDataCols];
+	for (int i = 0; i < totalDataCols; i++) dataColToBolsigCol[i] = -1;
+
+	// Reset and re-parse
+	for (int i = 0; i < 674; i++) bolsigPengCol[i] = -1;
+	bolsigNCols = 0;
+
+	stringstream hss2(headerLine);
+	colIndex = 0;
+	while (getline(hss2, token, ','))
+	{
+		while (!token.empty() && (token.back() == '\r' || token.back() == ' '))
+			token.pop_back();
+
+		if (token.length() > 1 && token[0] == 'R')
+		{
+			size_t k = 1;
+			while (k < token.length() && token[k] >= '0' && token[k] <= '9') k++;
+			if (k > 1)
+			{
+				int pengNum = atoi(token.substr(1, k-1).c_str());
+				if (pengNum >= 625 && pengNum <= 673)
+				{
+					if (bolsigPengCol[pengNum] == -1)
+					{
+						bolsigPengCol[pengNum] = bolsigNCols;
+					}
+					dataColToBolsigCol[colIndex] = bolsigNCols;
+					bolsigNCols++;
+				}
+			}
+		}
+		colIndex++;
+	}
+
+	// Read data rows
+	bolsigNPoints = 0;
+	string dataLine;
+	while (getline(file, dataLine))
+	{
+		if (dataLine.empty()) continue;
+		if (bolsigNPoints >= bolsigMaxPoints) break;
+
+		stringstream dss(dataLine);
+		string val;
+		int col = 0;
+		while (getline(dss, val, ','))
+		{
+			while (!val.empty() && (val.back() == '\r' || val.back() == ' '))
+				val.pop_back();
+
+			if (col == 1)  // Te_eV is the second column
+			{
+				bolsigTeEv[bolsigNPoints] = atof(val.c_str());
+			}
+			else if (col >= 2 && col < totalDataCols)
+			{
+				int bCol = dataColToBolsigCol[col];
+				if (bCol >= 0 && bCol < bolsigMaxReactions)
+				{
+					bolsigRate[bolsigNPoints][bCol] = atof(val.c_str());
+				}
+			}
+			col++;
+		}
+		bolsigNPoints++;
+	}
+
+	delete[] dataColToBolsigCol;
+	file.close();
+	bolsigLoaded = true;
+	cout << "NOTICE: Loaded BOLSIG+ rates table: " << bolsigNPoints << " points, " << bolsigNCols << " reaction columns." << endl;
+}
+
+
+
+double reaction::interpolateBolsigRate(int pengReaction, double TeEv)
+{
+	if (!bolsigLoaded) return 0.0;
+	if (pengReaction < 625 || pengReaction > 673) return 0.0;
+
+	int col = bolsigPengCol[pengReaction];
+	if (col < 0) return 0.0;
+
+	// Clamp to range
+	if (TeEv <= bolsigTeEv[0])
+		return bolsigRate[0][col];
+	if (TeEv >= bolsigTeEv[bolsigNPoints - 1])
+		return bolsigRate[bolsigNPoints - 1][col];
+
+	// Find bracketing interval
+	for (int i = 0; i < bolsigNPoints - 1; i++)
+	{
+		if (TeEv >= bolsigTeEv[i] && TeEv <= bolsigTeEv[i + 1])
+		{
+			double t = (TeEv - bolsigTeEv[i]) / (bolsigTeEv[i + 1] - bolsigTeEv[i]);
+			return bolsigRate[i][col] + t * (bolsigRate[i + 1][col] - bolsigRate[i][col]);
+		}
+	}
+
+	return bolsigRate[bolsigNPoints - 1][col];
 }
 
 
@@ -2523,7 +2697,29 @@ double reaction::reactionRateFunction(int j, double Tgas, double Telectron)
 		case 624 :
 		result = 1.6E-23;
 		break;
-		
+
+		// Peng reactions R625-R673: BOLSIG+ cross-section rates
+		case 625: case 626: case 627: case 628: case 629: case 630:
+		case 631: case 633: case 634: case 636:
+		case 638: case 639: case 640: case 641: case 642:
+		case 643: case 644: case 645: case 646: case 647:
+		case 648: case 649: case 650: case 651: case 652: case 653:
+		case 655: case 656: case 657: case 658: case 659:
+		case 660: case 661: case 663: case 665: case 666:
+		case 667: case 668: case 669: case 670: case 671:
+		case 672: case 673:
+		{
+			double TeEv = kb * Te / qe;
+			result = interpolateBolsigRate(j, TeEv);
+		}
+		break;
+
+		// Peng reactions with no cross-section data: rate = 0
+		case 632: case 635: case 637: case 654:
+		case 662: case 664:
+		result = 0;
+		break;
+
 		default :
 		result =0;
 	}
@@ -8443,10 +8639,263 @@ void reaction::setReactantAndProductSpecies(int j)
 		productSpeciesList[2] = 39; //NO2
 		productSpeciesList[3] = 53; //H2O
 		break;
-		
+
+		// === Peng reactions R625-R673 ===
+
+		// R625: e + H2O -> H2 + O-  (attachment)
+		case 625:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 53; //H2O
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 44; //H2
+		productSpeciesList[2] = 18; //O-
+		break;
+
+		// R626: e + H2O -> OH + H-  (attachment)
+		case 626:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 53; //H2O
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 45; //OH
+		productSpeciesList[2] = 26; //H-
+		break;
+
+		// R627-R630: e + H2O -> e + H2O  (elastic/vibrational, energy-loss-only)
+		case 627: case 628: case 629: case 630:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 53; //H2O
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 53; //H2O
+		break;
+
+		// R631: e + H2O -> e + H + OH  (dissociation)
+		case 631:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 53; //H2O
+		productSpeciesList[0] = 3;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 32; //H
+		productSpeciesList[3] = 45; //OH
+		break;
+
+		// R632: e + H2O -> e + H2O  (inverse, rate=0, energy-loss-only)
+		case 632:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 53; //H2O
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 53; //H2O
+		break;
+
+		// R633: e + H2O -> e + e + H2O+  (ionization)
+		case 633:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 53; //H2O
+		productSpeciesList[0] = 3;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 17; //e
+		productSpeciesList[3] = 15; //H2O+
+		break;
+
+		// R634-R644: e + N2 -> e + N2  (elastic/vibrational, energy-loss-only)
+		case 634: case 635: case 636: case 637:
+		case 638: case 639: case 640: case 641: case 642:
+		case 643: case 644:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 51; //N2
+		break;
+
+		// R645: e + N2 -> e + N2(A)  (electronic exc. A3Sigma triplet)
+		case 645:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 29; //N2(A)
+		break;
+
+		// R646: e + N2 -> e + N2(A)  (electronic exc. A3Sigma v1-4)
+		case 646:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 29; //N2(A)
+		break;
+
+		// R647: e + N2 -> e + N2(B)  (electronic exc. B3Pi)
+		case 647:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 30; //N2(B)
+		break;
+
+		// R648: e + N2 -> e + N2  (electronic exc. W3Delta, untracked)
+		case 648:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 51; //N2
+		break;
+
+		// R649: e + N2 -> e + N2(A)  (electronic exc. A'1Sigma mapped to A)
+		case 649:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 29; //N2(A)
+		break;
+
+		// R650-R656: e + N2 -> e + N2  (electronic exc. to untracked states)
+		case 650: case 651: case 652: case 653:
+		case 654: case 655: case 656:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 51; //N2
+		break;
+
+		// R657: e + N2 -> e + N + N  (dissociation)
+		case 657:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 3;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 33; //N
+		productSpeciesList[3] = 33; //N
+		break;
+
+		// R658: e + N2 -> e + e + N2+  (ionization)
+		case 658:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 3;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 17; //e
+		productSpeciesList[3] = 2;  //N2+
+		break;
+
+		// R659: e + N2 -> e + e + N2+  (ionization, second channel)
+		case 659:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 51; //N2
+		productSpeciesList[0] = 3;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 17; //e
+		productSpeciesList[3] = 2;  //N2+
+		break;
+
+		// R660: e + O2 -> O + O-  (attachment)
+		case 660:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 52; //O2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 34; //O
+		productSpeciesList[2] = 18; //O-
+		break;
+
+		// R661-R665: e + O2 -> e + O2  (elastic/vibrational, energy-loss-only)
+		case 661: case 662: case 663: case 664: case 665:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 52; //O2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 52; //O2
+		break;
+
+		// R666: e + O2 -> e + O2(a1D)  (electronic exc.)
+		case 666:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 52; //O2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 35; //O2(a1D)
+		break;
+
+		// R667-R668: e + O2 -> e + O2  (electronic exc. to untracked states)
+		case 667: case 668:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 52; //O2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 52; //O2
+		break;
+
+		// R669: e + O2 -> e + O + O  (dissociation)
+		case 669:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 52; //O2
+		productSpeciesList[0] = 3;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 34; //O
+		productSpeciesList[3] = 34; //O
+		break;
+
+		// R670: e + O2 -> e + O + O(1D)  (dissociation)
+		case 670:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 52; //O2
+		productSpeciesList[0] = 3;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 34; //O
+		productSpeciesList[3] = 31; //O(1D)
+		break;
+
+		// R671-R672: e + O2 -> e + O2  (electronic exc. to untracked states)
+		case 671: case 672:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 52; //O2
+		productSpeciesList[0] = 2;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 52; //O2
+		break;
+
+		// R673: e + O2 -> e + e + O2+  (ionization)
+		case 673:
+		reactantSpeciesList[0] = 2;
+		reactantSpeciesList[1] = 17; //e
+		reactantSpeciesList[2] = 52; //O2
+		productSpeciesList[0] = 3;
+		productSpeciesList[1] = 17; //e
+		productSpeciesList[2] = 17; //e
+		productSpeciesList[3] = 6;  //O2+
+		break;
+
 		default:
 		;
-	}	
+	}
 }
 
 

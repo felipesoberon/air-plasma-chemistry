@@ -1,0 +1,101 @@
+================================================================================
+  Mapping: BOLSIG+ C-numbers to Peng et al. (2022) reaction numbers
+  Output file: results_Peng.dat
+================================================================================
+
+  C#    Species  Type            Threshold   Peng#   Reaction
+--------------------------------------------------------------------------------
+
+H2O (Morgan database)
+--------------------------------------------------------------------------------
+  C1    H2O      Attachment                  R625    e + H2O -> H2 + O-
+  C2    H2O      Attachment                  R626    e + H2O -> OH + H-
+  C3    H2O      Attachment                  ---     e + H2O -> OH- + H (extra)
+  C4    H2O      Effective                   R627    e + H2O -> e + H2O (elastic)
+  C5    H2O      Excitation      0.20 eV     R628    e + H2O -> e + H2O (V2)
+  C6    H2O      Excitation      0.43 eV     R629    e + H2O -> e + H2O (V1)
+  C7    H2O      Excitation      0.43 eV     R630    e + H2O -> e + H2O (V3)
+  C8    H2O      Excitation      13.0 eV     ---     e + H2O -> O* + H2 (extra)
+  C9    H2O      Excitation      7.00 eV     R631    e + H2O -> e + H + OH
+  C10   H2O      Ionization      13.0 eV     R633    e + H2O -> 2e + H2O+
+
+  Note: R632 (e + H + OH -> e + H2O) is the inverse of R631/C9.
+        No separate C-number; use detailed balance.
+  Note: C3 and C8 are extra processes from the Morgan database not
+        explicitly listed in Peng's Table A1.
+
+N2 (IST-Lisbon database)
+--------------------------------------------------------------------------------
+  C11   N2       Effective                   R634    e + N2 -> e + N2 (elastic)
+  C12   N2       Excitation      0.30 eV     R636    e + N2 -> e + N2 (V1)
+  C13   N2       Excitation      0.60 eV     R638    e + N2 -> e + N2 (V2)
+  C14   N2       Excitation      0.90 eV     R639    e + N2 -> e + N2 (V3)
+  C15   N2       Excitation      1.10 eV     R640    e + N2 -> e + N2 (V4)
+  C16   N2       Excitation      1.40 eV     R641    e + N2 -> e + N2 (V5)
+  C17   N2       Excitation      1.70 eV     R642    e + N2 -> e + N2 (V6)
+  C18   N2       Excitation      11.0 eV     R653    e + N2 -> e + N2*
+  C19   N2       Excitation      11.8 eV     R655    e + N2 -> e + N2(e 3Sigma)
+  C20   N2       Excitation      12.2 eV     R656    e + N2 -> e + N2(A'1Sigma)
+  C21   N2       Excitation      13.0 eV     R657    e + N2 -> e + N2 (sing)
+  C22   N2       Excitation      2.00 eV     R643    e + N2 -> e + N2 (V7)
+  C23   N2       Excitation      2.20 eV     R644    e + N2 -> e + N2 (V8)
+  C24   N2       Excitation      2.50 eV     ---     e + N2 -> e + N2 (V9, extra)
+  C25   N2       Excitation      2.70 eV     ---     e + N2 -> e + N2 (V10, extra)
+  C26   N2       Excitation      6.20 eV     R645    e + N2 -> e + N2(A 3Sigma)
+  C27   N2       Excitation      7.00 eV     R646    e + N2 -> e + N2(A 3Sigma)
+  C28   N2       Excitation      7.40 eV     R647    e + N2 -> e + N2(B 3Pi)
+  C29   N2       Excitation      7.40 eV     R648    e + N2 -> e + N2(w 3Delta)
+  C30   N2       Excitation      7.80 eV     R649    e + N2 -> e + N2(A 3Sigma)
+  C31   N2       Excitation      8.20 eV     R650    e + N2 -> e + N2(B'3Sigma)
+  C32   N2       Excitation      8.40 eV     R651    e + N2 -> e + N2(a'1Sigma)
+  C33   N2       Excitation      8.60 eV     R652    e + N2 -> e + N2(A 1Pi)
+  C34   N2       Excitation      8.90 eV     R653    e + N2 -> e + N2(w 1Delta)
+  C35   N2       Ionization      15.6 eV     R658    e + N2 -> 2e + N2+
+  C36   N2       Ionization      18.8 eV     R659    e + N2 -> 2e + N2+
+
+  Note: IST-Lisbon does not include a rotational excitation (0.02 eV)
+        in this set, so R635 has no direct match.
+  Note: IST-Lisbon has V1-V10 (C12-C17, C22-C25) while Peng lists
+        V1-V8 (R636-R644). C24 and C25 (V9, V10) are extra.
+  Note: C18 at 11.0 eV may correspond to R654 (C 3Pi_u) rather than
+        R653 (w 1Delta at 8.9 eV). R653 maps to C34.
+
+O2 (IST-Lisbon database)
+--------------------------------------------------------------------------------
+  C37   O2       Attachment                  R660    e + O2 -> O + O-
+  C38   O2       Effective                   R661    e + O2 -> e + O2 (elastic)
+  C39   O2       Excitation      0.19 eV     R663    e + O2 -> e + O2 (V)
+  C40   O2       Excitation      0.38 eV     R665    e + O2 -> e + O2 (V)
+  C41   O2       Excitation      0.60 eV     ---     e + O2 -> e + O2 (V, extra)
+  C42   O2       Excitation      0.80 eV     ---     e + O2 -> e + O2 (V, extra)
+  C43   O2       Excitation      0.98 eV     R666    e + O2 -> e + O2(a 1Delta)
+  C44   O2       Excitation      1.63 eV     R667    e + O2 -> e + O2(b 1Sigma)
+  C45   O2       Excitation      14.7 eV     R672    e + O2 -> e + O2
+  C46   O2       Excitation      4.50 eV     R668    e + O2 -> e + O2
+  C47   O2       Excitation      6.00 eV     R669    e + O2 -> e + O + O
+  C48   O2       Excitation      8.40 eV     R670    e + O2 -> e + O + O(1D)
+  C49   O2       Excitation      9.97 eV     R671    e + O2 -> e + O2
+  C50   O2       Ionization      12.1 eV     R673    e + O2 -> 2e + O2+
+
+  Note: IST-Lisbon has 1 attachment channel vs Morgan's 2.
+  Note: IST-Lisbon has 4 vibrational levels (0.19, 0.38, 0.60, 0.80 eV)
+        while Peng lists fewer. C41 and C42 may be extra.
+  Note: IST-Lisbon does not include a rotational excitation (0.02 eV)
+        in this set, so R662 has no direct match.
+  Note: Morgan has 2 entries each at 0.19 and 0.38 eV while IST-Lisbon
+        has 1 each, so R664 (2nd 0.19 eV) has no direct match here.
+
+================================================================================
+  SUMMARY
+================================================================================
+
+  Total C-numbers in output:  50
+  Mapped to Peng reactions:   43 (R625-R673, excluding R632, R635, R662, R664)
+  Extra processes (not in Peng): C3, C8, C24, C25, C41, C42  (6 extra)
+  Missing Peng reactions:
+    R632 - inverse of R631, use detailed balance
+    R635 - rotational N2 (0.02 eV), not in IST-Lisbon set
+    R662 - rotational O2 (0.02 eV), not in IST-Lisbon set
+    R664 - 2nd vibrational O2 (0.19 eV), IST-Lisbon has only one
+
+================================================================================
