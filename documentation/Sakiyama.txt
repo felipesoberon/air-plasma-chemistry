@@ -1,0 +1,635 @@
+Sakiyama et al. (2012) - Plasma chemistry model of surface microdischarge in humid air
+J. Phys. D: Appl. Phys. 45 (2012) 425201
+Complete list of 624 reactions and rate constants
+
+Notes:
+  e = electron energy in eV (epsilon)
+  Te = electron temperature (K)
+  Tg = gas temperature (K)
+  M = third body (background gas)
+  Rate constant units: (s-1), (m3 s-1), or (m6 s-1)
+
+(R1) e + N2 -> N(2D) + N + e, rate: 3.99e-17 * e^2.24 * exp(-9.10/e)
+(R2) e + N2 -> N2(A 3S) + e, rate: 3.34e-16 * e^-0.06 * exp(-8.50/e)
+(R3) e + N2 -> N2(B 3P) + e, rate: 8.44e-15 * e^-0.33 * exp(-9.15/e)
+(R4) e + N2 -> N2+ + e + e, rate: 1e-16 * e^1.90 * exp(-14.6/e)
+(R5) e + N -> N(2D) + e, rate: 5.06e-15 * exp(-10.8/e^3.95)
+(R6) e + N -> N+ + e + e, rate: 1.45e-17 * e^2.58 * exp(-8.54/e)
+(R7) e + O2 -> O + O + e, rate: 2.03e-14 * e^-0.10 * exp(-8.47/e)
+(R8) e + O2 -> O(1D) + O + e, rate: 1.82e-14 * e^-0.13 * exp(-10.7/e)
+(R9) e + O2 -> O2(a 1D) + e, rate: 1.04e-15 * exp(-2.59/e)
+(R10) e + O2 -> O2+ + e + e, rate: 9.54e-12 * e^-1.05 * exp(-55.6/e)
+(R11) e + O3 -> O + O2 + e, rate: 1.78e-12 * e^-0.614 * exp(-11.5/e)
+(R12) e + O -> O(1D) + e, rate: 7.46e-15 * exp(-5.58/e^1.47)
+(R13) e + O -> O+ + e + e, rate: 4.75e-15 * e^0.61 * exp(-22.1/e)
+(R14) e + H2O -> H2O+ + e + e, rate: 9.65e-18 * e^2.53 * exp(-8.99/e)
+(R15) e + H2O -> OH+ + H + e + e, rate: 9.89e-12 * e^-1.64 * exp(-67.6/e)
+(R16) e + H2O -> H+ + OH + e + e, rate: 7.45e-15 * e^0.34 * exp(-54.2/e)
+(R17) e + H2O -> O+ + H2 + e + e, rate: 7.4e-16 * e^0.45 * exp(-55.5/e)
+(R18) e + H2O -> H2+ + O + e + e, rate: 8.49e-15 * e^-1.23 * exp(-74.0/e)
+(R19) e + H2O -> OH + H + e, rate: 5.15e-15 * e^0.62 * exp(-10.9/e)
+(R20) e + H2O -> H2 + O(1D) + e, rate: 5.19e-18 * e^1.2 * exp(-13.8/e)
+(R21) e + H2 -> H + H + e, rate: 3.29e-15 * e^0.578 * exp(-7.56/e)
+(R22) e + H2 -> H2+ + e + e, rate: 4e-17 * e^2.13 * exp(-14.9/e)
+(R23) e + N2O5 -> NO2+ + NO3 + e + e, rate: 2.43e-17 * e^2.77 * exp(-5.62/e)
+(R24) e + N+ + M -> N + M, rate: 3.12e-35 / Te^1.5
+(R25) e + N2+ -> N + N, rate: 1.66e-12 / Te^0.7
+(R26) e + N2+ -> N(2D) + N, rate: 1.5e-12 / Te^0.7
+(R27) e + N2+ + M -> N2 + M, rate: 3.12e-35 / Te^1.5
+(R28) e + N3+ -> N2 + N, rate: 3.46e-12 / Te^0.5
+(R29) e + N4+ -> N2 + N2, rate: 4.73e-11 / Te^0.53
+(R30) e + O+ + M -> O + M, rate: 3.12e-35 / Te^1.5
+(R31) e + O2+ -> O + O, rate: 1.68e-11 / Te^0.7
+(R32) e + O2+ -> O + O(1D), rate: 1.24e-11 / Te^0.7
+(R33) e + O2+ + M -> O2 + M, rate: 3.12e-35 / Te^1.5
+(R34) e + O4+ -> O2 + O2, rate: 2.42e-11 / Te^0.5
+(R35) e + N2O+ -> N2 + O, rate: 3.46e-12 / Te^0.5
+(R36) e + NO+ -> N + O, rate: 1.07e-11 / Te^0.85
+(R37) e + NO+ -> N(2D) + O, rate: 4.28e-11 / Te^0.85
+(R38) e + NO+ + M -> NO + M, rate: 3.12e-35 / Te^1.5
+(R39) e + NO2+ -> NO + O, rate: 3.46e-12 / Te^0.5
+(R40) e + H2+ -> H + H, rate: 1.86e-13 / Te^0.43
+(R41) e + H3+ -> H + H2, rate: 5.20e-11 / Te^0.5
+(R42) e + H3+ -> H + H + H, rate: 1.14e-11 / Te^0.97
+(R43) e + H2O+ -> OH + H, rate: 2.73e-12 / Te^0.5
+(R44) e + H2O+ -> O + H2, rate: 1.37e-12 / Te^0.5
+(R45) e + H2O+ -> O + H + H, rate: 1.37e-12 / Te^0.5
+(R46) e + H3O+ -> OH + H + H, rate: 5.46e-12 / Te^0.5
+(R47) e + e + N+ -> N + e, rate: 1e-31 * (Tg/Te)^4.5
+(R48) e + e + N2+ -> N2 + e, rate: 1e-31 * (Tg/Te)^4.5
+(R49) e + e + O+ -> O + e, rate: 1e-31 * (Tg/Te)^4.5
+(R50) e + e + O2+ -> O2 + e, rate: 1e-31 * (Tg/Te)^4.5
+(R51) e + e + NO+ -> NO + e, rate: 1e-31 * (Tg/Te)^4.5
+(R52) e + e + H+ -> H + e, rate: 1e-31 * (Tg/Te)^4.5
+(R53) e + e + H2+ -> H2 + e, rate: 1e-31 * (Tg/Te)^4.5
+(R54) e + e + OH+ -> OH + e, rate: 1e-31 * (Tg/Te)^4.5
+(R55) e + e + H2O+ -> H2O + e, rate: 1e-31 * (Tg/Te)^4.5
+(R56) e + O + O2 -> O- + O2, rate: 1e-43
+(R57) e + O + O2 -> O2- + O, rate: 1e-43
+(R58) e + O2 + O2 -> O2- + O2, rate: 1.4e-41 * Tg/Te * exp(-600/Tg) * exp(700*(Te-Tg)/(Te*Tg))
+(R59) e + O2 + N2 -> O2- + N2, rate: 1.1e-43 * (Tg/Te)^2 * exp(-70/Tg) * exp(1500*(Te-Tg)/(Te*Tg))
+(R60) e + O2 -> O- + O, rate: 2.63e-16 * e^-0.495 * exp(-5.65/e)
+(R61) e + O2 -> O2-, rate: 9.72e-15 * e^-1.62 * exp(-14.2/e) for e > 1.1; 2.78e-20 for e < 1.1
+(R62) e + O3 -> O- + O2, rate: 1e-17
+(R63) e + O3 -> O2- + O, rate: 1e-15
+(R64) e + O3 + M -> O3- + M, rate: 1e-43
+(R65) e + N2O -> O- + N2, rate: 2e-16
+(R66) e + NO + M -> NO- + M, rate: 8e-43
+(R67) e + NO2 -> O- + NO, rate: 1e-17
+(R68) e + NO2 + M -> NO2- + M, rate: 1.5e-42
+(R69) e + NO3 + M -> NO3- + M, rate: 1e-42
+(R70) e + H2O -> H- + OH, rate: 4.42e-14 * e^-2.0 * exp(-13.39/e)
+(R71) e + H2O -> O- + H2, rate: 2.97e-15 * e^-1.56 * exp(-13.67/e)
+(R72) e + H2O -> OH- + H, rate: 9.6e-16 * e^-1.70 * exp(-13.31/e)
+(R73) e + HNO3 -> NO2- + OH, rate: 5e-14
+(R74) O- + N -> NO + e, rate: 2.6e-16
+(R75) O- + N2 -> N2O + e, rate: 1e-18
+(R76) O- + N2(A 3S) -> N2 + O + e, rate: 2.2e-15
+(R77) O- + N2(B 3P) -> N2 + O + e, rate: 1.9e-15
+(R78) O- + O -> O2 + e, rate: 1.4e-16
+(R79) O- + O2 -> O3 + e, rate: 1e-18
+(R80) O- + O2(a 1D) -> O3 + e, rate: 3e-16
+(R81) O- + O3 -> O2 + O2 + e, rate: 3e-16
+(R82) O- + NO -> NO2 + e, rate: 2.6e-16
+(R83) O- + H2 -> H2O + e, rate: 7e-16
+(R84) O2- + N -> NO2 + e, rate: 5e-16
+(R85) O2- + N2 -> N2 + O2 + e, rate: 1.9e-18 * (Tg/300)^0.5 * exp(-4990/Tg)
+(R86) O2- + N2(A 3S) -> N2 + O2 + e, rate: 2.1e-15
+(R87) O2- + N2(B 3P) -> N2 + O2 + e, rate: 2.5e-15
+(R88) O2- + O -> O3 + e, rate: 1.5e-16
+(R89) O2- + O2 -> O2 + O2 + e, rate: 2.7e-16 * (Tg/300)^0.5 * exp(-5590/Tg)
+(R90) O2- + O3 -> O3 + O2 + e, rate: 6e-16
+(R91) O2- + O2(a 1D) -> O2 + O2 + e, rate: 2e-16
+(R92) O2- + H -> HO2 + e, rate: 1.4e-15
+(R93) O3- + O -> O2 + O2 + e, rate: 3e-16
+(R94) O3- + O2 -> O3 + O2 + e, rate: 2.3e-17
+(R95) O3- + O3 -> O2 + O2 + O2 + e, rate: 3e-16
+(R96) NO- + M -> NO + M + e, rate: 2.40e-19
+(R97) NO- + NO -> NO + NO + e, rate: 5e-18
+(R98) NO- + N2O -> NO + N2O + e, rate: 5.1e-18
+(R99) NO- + H2 -> NO + H2 + e, rate: 2.3e-19
+(R100) NO2- + O -> NO3 + e, rate: 1e-18
+(R101) NO2- + N -> N2 + O2 + e, rate: 1e-18
+(R102) NO3- + O -> NO2 + O2 + e, rate: 1e-18
+(R103) NO3- + N -> N2 + O3 + e, rate: 1e-18
+(R104) H- + O2 -> HO2 + e, rate: 1.2e-15
+(R105) H- + H -> H2 + e, rate: 1.8e-15
+(R106) OH- + O -> HO2 + e, rate: 2e-16
+(R107) OH- + H -> H2O + e, rate: 1.8e-15
+(R108) N+ + N + M -> N2+ + M, rate: 1e-41
+(R109) N+ + N2 + M -> N3+ + M, rate: 4.6e-41
+(R110) N+ + N2O -> NO+ + N2, rate: 5.5e-16
+(R111) N+ + NO -> NO+ + N, rate: 4.72e-16
+(R112) N+ + NO -> N2+ + O, rate: 8.33e-17
+(R113) N+ + NO -> O+ + N2, rate: 1e-18
+(R114) N+ + NO2 -> NO2+ + N, rate: 3e-16
+(R115) N+ + NO2 -> NO+ + NO, rate: 5e-16
+(R116) N+ + O -> O+ + N, rate: 1e-18
+(R117) N+ + O + M -> NO+ + M, rate: 1e-41
+(R118) N+ + O2 -> NO+ + O, rate: 2.7e-16
+(R119) N+ + O2 -> O+ + NO, rate: 2.8e-17
+(R120) N+ + O2 -> O2+ + N, rate: 3e-16
+(R121) N+ + O3 -> NO+ + O2, rate: 5e-16
+(R122) N+ + OH -> OH+ + N, rate: 3.4e-16
+(R123) N+ + OH -> NO+ + H, rate: 3.4e-16
+(R124) N+ + H2O -> H2O+ + N, rate: 1.19e-15
+(R125) N+ + H2O -> NO+ + H2, rate: 2.1e-16
+(R126) N2+ + N -> N+ + N2, rate: 1e-18
+(R127) N2+ + N + M -> N3+ + M, rate: 1e-41 * (300/Tg)
+(R128) N2+ + N2 + M -> N4+ + M, rate: 1e-41 * (300/Tg)
+(R129) N2+ + N2(A 3S) -> N3+ + N, rate: 3e-16
+(R130) N2+ + N2O -> N2O+ + N2, rate: 6e-16
+(R131) N2+ + N2O -> NO+ + N + N2, rate: 4e-16
+(R132) N2+ + NO -> NO+ + N2, rate: 3.9e-16
+(R133) N2+ + NO2 -> NO+ + N2O, rate: 5e-17
+(R134) N2+ + NO2 -> NO2+ + N2, rate: 3e-16
+(R135) N2+ + O -> NO+ + N, rate: 1.4e-16
+(R136) N2+ + O -> NO+ + N(2D), rate: 1.8e-16 * (300/Tg)
+(R137) N2+ + O -> O+ + N2, rate: 1e-17 * (300/Tg)^0.5
+(R138) N2+ + O2 -> O2+ + N2, rate: 5e-17
+(R139) N2+ + O3 -> O2+ + O + N2, rate: 1e-16
+(R140) N2+ + H2O -> H2O+ + N2, rate: 2.3e-15
+(R141) N3+ + N -> N2+ + N2, rate: 6.6e-17
+(R142) N3+ + O2 -> O2+ + N + N2, rate: 2.3e-17
+(R143) N3+ + O2 -> NO+ + O + N2, rate: 2e-17
+(R144) N3+ + O2 -> NO2+ + N2, rate: 4.4e-17
+(R145) N3+ + NO -> NO+ + N2 + N, rate: 7e-17
+(R146) N3+ + NO -> N2O+ + N2, rate: 7e-17
+(R147) N3+ + N2O -> NO+ + N2 + N2, rate: 5e-17
+(R148) N3+ + NO2 -> NO+ + NO + N2, rate: 7e-17
+(R149) N3+ + NO2 -> NO2+ + N + N2, rate: 7e-17
+(R150) N4+ + N2 -> N2+ + N2 + N2, rate: 2.1e-16 * exp(Tg/121)
+(R151) N4+ + N2O -> N2O+ + N2 + N2, rate: 3e-16
+(R152) N4+ + N -> N+ + N2 + N2, rate: 1e-17
+(R153) N4+ + NO -> NO+ + N2 + N2, rate: 3.9e-16
+(R154) N4+ + NO2 -> NO2+ + N2 + N2, rate: 2.5e-16
+(R155) N4+ + NO2 -> NO+ + N2O + N2, rate: 5e-17
+(R156) N4+ + O -> O+ + N2 + N2, rate: 2.5e-16
+(R157) N4+ + O2 -> O2+ + N2 + N2, rate: 2.4e-16
+(R158) N4+ + H2 -> H2+ + N2 + N2, rate: 3e-16 * exp(-1800/Tg)
+(R159) N4+ + H2O -> H2O+ + N2 + N2, rate: 3e-15
+(R160) O+ + N + M -> NO+ + M, rate: 1e-41
+(R161) O+ + N2 + M -> NO+ + N + M, rate: 6e-41 * (300/Tg)^2
+(R162) O+ + O + M -> O2+ + M, rate: 1e-41
+(R163) O+ + O2 -> O2+ + O, rate: 2.1e-17 * (300/Tg)^0.5
+(R164) O+ + O3 -> O2+ + O2, rate: 1e-16
+(R165) O+ + N(2D) -> N+ + O, rate: 1.3e-16
+(R166) O+ + NO -> NO+ + O, rate: 1e-18
+(R167) O+ + NO -> O2+ + N, rate: 3e-18
+(R168) O+ + N2O -> N2O+ + O, rate: 6.3e-16
+(R169) O+ + N2O -> NO+ + NO, rate: 2.3e-16
+(R170) O+ + N2O -> O2+ + N2, rate: 2e-17
+(R171) O+ + NO2 -> NO+ + O2, rate: 5e-16
+(R172) O+ + NO2 -> NO2+ + O, rate: 1.6e-15
+(R173) O+ + H -> H+ + O, rate: 6.8e-16
+(R174) O+ + H2 -> OH+ + H, rate: 1.7e-15
+(R175) O+ + OH -> OH+ + O, rate: 3.3e-16
+(R176) O+ + OH -> O2+ + H, rate: 3.6e-16
+(R177) O+ + H2O -> H2O+ + O, rate: 3.2e-15
+(R178) O2+ + O2 + M -> O4+ + M, rate: 5.5e-43 * (300/Tg)^2.7
+(R179) O2+ + N -> NO+ + O, rate: 1.5e-16
+(R180) O2+ + N2 -> NO+ + NO, rate: 1e-23
+(R181) O2+ + N2O5 -> NO2+ + NO3 + O2, rate: 8.8e-16
+(R182) O2+ + NO -> NO+ + O2, rate: 4.6e-16
+(R183) O2+ + NO2 -> NO2+ + O2, rate: 6.6e-16
+(R184) O2+ + NO2 -> NO+ + O3, rate: 1e-17
+(R185) O4+ + O -> O2+ + O3, rate: 3e-16
+(R186) O4+ + O2 -> O2+ + O2 + O2, rate: 3.3e-12 * (300/Tg)^4 * exp(-5030/Tg)
+(R187) O4+ + NO -> NO+ + O2 + O2, rate: 6.80e-16
+(R188) O4+ + NO2 -> NO2+ + O2 + O2, rate: 3e-16
+(R189) O- + O2 + M -> O3- + M, rate: 1.1e-42 * (300/Tg)
+(R190) O- + O2(a 1D) -> O2- + O, rate: 1e-16
+(R191) O- + O3 -> O3- + O, rate: 8e-16
+(R192) O- + N2O -> NO- + NO, rate: 2e-16
+(R193) O- + N2O -> N2O- + O, rate: 2e-18
+(R194) O- + NO + M -> NO2- + M, rate: 1e-41
+(R195) O- + NO2 -> NO2- + O, rate: 1.2e-15
+(R196) O- + NO3 -> NO3- + O, rate: 3e-16
+(R197) O- + H2 -> OH- + H, rate: 3.3e-17
+(R198) O- + H2O -> OH- + OH, rate: 1.4e-15
+(R199) O2- + O -> O- + O2, rate: 3.3e-16
+(R200) O2- + O2 + M -> O4- + M, rate: 3.5e-43 * (300/Tg)
+(R201) O2- + O3 -> O3- + O2, rate: 3.5e-16
+(R202) O2- + N2O -> O3- + N2, rate: 1e-17
+(R203) O2- + NO2 -> NO2- + O2, rate: 7e-16
+(R204) O2- + NO3 -> NO3- + O2, rate: 5e-16
+(R205) O2- + HNO3 -> NO3- + HO2, rate: 2.8e-16
+(R206) O3- + O -> O2- + O2, rate: 1e-17
+(R207) O3- + NO -> NO2- + O2, rate: 1e-17
+(R208) O3- + NO -> NO3- + O, rate: 1e-17
+(R209) O3- + NO2 -> NO3- + O2, rate: 2e-17
+(R210) O3- + NO2 -> NO2- + O3, rate: 7e-17
+(R211) O3- + NO3 -> NO3- + O3, rate: 5e-16
+(R212) O3- + H -> OH- + O2, rate: 8.4e-16
+(R213) O4- + NO -> NO3- + O2, rate: 2.5e-16
+(R214) O4- + O -> O- + O2 + O2, rate: 3e-16
+(R215) O4- + O -> O3- + O2, rate: 4e-16
+(R216) O4- + N2 -> O2- + O2 + N2, rate: 1e-16 * exp(-1044/Tg)
+(R217) N2O+ + NO -> NO+ + N2O, rate: 2.3e-16
+(R218) N2O+ + N2O -> NO+ + NO + N2, rate: 1.2e-17
+(R219) N2O+ + NO2 -> NO+ + N2 + O2, rate: 4.29e-16
+(R220) N2O+ + NO2 -> NO2+ + N2O, rate: 2.21e-16
+(R221) N2O+ + O2 -> NO+ + NO2, rate: 4.59e-17
+(R222) N2O+ + O2 -> O2+ + N2O, rate: 2.24e-16
+(R223) NO+ + N2O5 -> NO2+ + NO2 + NO2, rate: 5.9e-16
+(R224) NO+ + O3 -> NO2+ + O2, rate: 1e-21
+(R225) NO+ + N + M -> N2O+ + M, rate: 1e-41 * (300/Tg)
+(R226) NO- + N2O -> NO2- + N2, rate: 2.8e-20
+(R227) NO- + NO2 -> NO2- + NO, rate: 3e-16
+(R228) NO- + NO3 -> NO3- + NO, rate: 3e-16
+(R229) NO- + O2 -> O2- + NO, rate: 5e-16
+(R230) NO- + O3 -> O3- + NO, rate: 3e-16
+(R231) NO- + O -> O- + NO, rate: 3e-16
+(R232) NO2+ + NO -> NO+ + NO2, rate: 2.75e-16
+(R233) NO2- + N2O5 -> NO3- + NO3 + NO, rate: 7e-16
+(R234) NO2- + NO -> NO- + NO2, rate: 2.75e-16
+(R235) NO2- + NO2 -> NO3- + NO, rate: 4e-18
+(R236) NO2- + NO3 -> NO3- + NO2, rate: 5e-16
+(R237) NO2- + O3 -> NO3- + O2, rate: 1.8e-17
+(R238) NO2- + H -> OH- + NO, rate: 4e-16
+(R239) NO2- + N2O -> NO3- + N2, rate: 5e-19
+(R240) NO2- + HNO3 -> NO3- + HNO2, rate: 1.6e-15
+(R241) NO3- + NO -> NO2- + NO2, rate: 3e-21
+(R242) H+ + O -> O+ + H, rate: 3.8e-16
+(R243) H+ + O2 -> O2+ + H, rate: 1.17e-15
+(R244) H+ + NO -> NO+ + H, rate: 1.9e-15
+(R245) H+ + H2 + M -> H3+ + M, rate: 3.1e-41
+(R246) H+ + H2O -> H2O+ + H, rate: 8.2e-15
+(R247) H- + N2O -> OH- + N2, rate: 1.1e-15
+(R248) H- + NO2 -> NO2- + H, rate: 2.9e-15
+(R249) H- + H2O -> OH- + H2, rate: 3.8e-15
+(R250) H2+ + O2 -> O2+ + H2, rate: 7.83e-16
+(R251) H2+ + H -> H+ + H2, rate: 6.4e-16
+(R252) H2+ + H2 -> H3+ + H, rate: 2e-15
+(R253) H2+ + H2O -> H3O+ + H, rate: 3.43e-15
+(R254) H2+ + H2O -> H2O+ + H2, rate: 3.86e-15
+(R255) H3+ + O -> OH+ + H2, rate: 8e-16
+(R256) H3+ + H2O -> H3O+ + H2, rate: 3e-15
+(R257) H3+ + NO2 -> NO+ + OH + H2, rate: 7e-16
+(R258) OH+ + O2 -> O2+ + OH, rate: 5.9e-16
+(R259) OH+ + NO -> NO+ + OH, rate: 5.2e-16
+(R260) OH+ + NO2 -> NO+ + HO2, rate: 1.3e-15
+(R261) OH+ + N2O -> N2O+ + OH, rate: 2.13e-16
+(R262) OH+ + H2 -> H2O+ + H, rate: 9.7e-16
+(R263) OH+ + OH -> H2O+ + O, rate: 7e-16
+(R264) OH+ + H2O -> H2O+ + OH, rate: 1.59e-15
+(R265) OH+ + H2O -> H3O+ + O, rate: 1.3e-15
+(R266) OH- + O3 -> O3- + OH, rate: 9e-16
+(R267) OH- + NO2 -> NO2- + OH, rate: 1.9e-15
+(R268) H2O+ + N -> NO+ + H2, rate: 1.9e-16
+(R269) H2O+ + O -> O2+ + H2, rate: 5.5e-17
+(R270) H2O+ + O2 -> O2+ + H2O, rate: 4.3e-16
+(R271) H2O+ + NO -> NO+ + H2O, rate: 4.6e-16
+(R272) H2O+ + NO2 -> NO2+ + H2O, rate: 1.2e-15
+(R273) H2O+ + H2 -> H3O+ + H, rate: 7.6e-16
+(R274) H2O+ + H2O -> H3O+ + OH, rate: 1.7e-15
+(R275) H3O+ + NO -> NO+ + H + H2O, rate: 1.5e-18
+(R276) H3O+ + N2O5 -> NO2+ + HNO3 + H2O, rate: 5.5e-16
+(R277) O+ + O- -> O + O, rate: 2e-13 * (300/Tg)^0.5
+(R278) O+ + O2- -> O2 + O, rate: 2e-13 * (300/Tg)^0.5
+(R279) O+ + O3- -> O3 + O, rate: 2e-13 * (300/Tg)^0.5
+(R280) O+ + O4- -> O2 + O2 + O, rate: 1e-13
+(R281) O+ + N2O- -> N2O + O, rate: 2e-13 * (300/Tg)^0.5
+(R282) O+ + NO- -> NO + O, rate: 2e-13 * (300/Tg)^0.5
+(R283) O+ + NO2- -> NO2 + O, rate: 2e-13 * (300/Tg)^0.5
+(R284) O+ + NO3- -> NO3 + O, rate: 2e-13 * (300/Tg)^0.5
+(R285) O+ + H- -> O + H, rate: 2e-13 * (300/Tg)^0.5
+(R286) O+ + OH- -> O + OH, rate: 2e-13 * (300/Tg)^0.5
+(R287) O2+ + O- -> O + O + O, rate: 1e-13
+(R288) O2+ + O- -> O + O2, rate: 2e-13 * (300/Tg)^0.5
+(R289) O2+ + O2- -> O2 + O2, rate: 2e-13 * (300/Tg)^0.5
+(R290) O2+ + O2- -> O2 + O + O, rate: 1e-13
+(R291) O2+ + O3- -> O3 + O2, rate: 2e-13 * (300/Tg)^0.5
+(R292) O2+ + O3- -> O3 + O + O, rate: 1e-13
+(R293) O2+ + O4- -> O2 + O2 + O2, rate: 1e-13
+(R294) O2+ + N2O- -> N2O + O2, rate: 2e-13 * (300/Tg)^0.5
+(R295) O2+ + N2O- -> N2O + O + O, rate: 1e-13
+(R296) O2+ + NO- -> NO + O2, rate: 2e-13 * (300/Tg)^0.5
+(R297) O2+ + NO- -> NO + O + O, rate: 1e-13
+(R298) O2+ + NO2- -> NO2 + O2, rate: 2e-13 * (300/Tg)^0.5
+(R299) O2+ + NO2- -> NO2 + O + O, rate: 1e-13
+(R300) O2+ + NO3- -> NO3 + O2, rate: 2e-13 * (300/Tg)^0.5
+(R301) O2+ + NO3- -> NO3 + O + O, rate: 1e-13
+(R302) O2+ + H- -> H + O2, rate: 2e-13 * (300/Tg)^0.5
+(R303) O2+ + H- -> H + O + O, rate: 1e-13
+(R304) O2+ + OH- -> OH + O2, rate: 2e-13 * (300/Tg)^0.5
+(R305) O2+ + OH- -> OH + O + O, rate: 1e-13
+(R306) O4+ + O- -> O + O2 + O2, rate: 1e-13
+(R307) O4+ + O2- -> O2 + O2 + O2, rate: 1e-13
+(R308) O4+ + O3- -> O3 + O2 + O2, rate: 1e-13
+(R309) O4+ + O4- -> O2 + O2 + O2 + O2, rate: 1e-13
+(R310) O4+ + N2O- -> N2O + O2 + O2, rate: 1e-13
+(R311) O4+ + NO- -> NO + O2 + O2, rate: 1e-13
+(R312) O4+ + NO2- -> NO2 + O2 + O2, rate: 1e-13
+(R313) O4+ + NO3- -> NO3 + O2 + O2, rate: 1e-13
+(R314) O4+ + H- -> H + O2 + O2, rate: 1e-13
+(R315) O4+ + OH- -> OH + O2 + O2, rate: 1e-13
+(R316) N+ + N2O- -> N2O + N, rate: 2e-13 * (300/Tg)^0.5
+(R317) N+ + NO- -> NO + N, rate: 2e-13 * (300/Tg)^0.5
+(R318) N+ + NO2- -> NO2 + N, rate: 2e-13 * (300/Tg)^0.5
+(R319) N+ + NO3- -> NO3 + N, rate: 2e-13 * (300/Tg)^0.5
+(R320) N+ + O- -> O + N, rate: 2e-13 * (300/Tg)^0.5
+(R321) N+ + O2- -> O2 + N, rate: 2e-13 * (300/Tg)^0.5
+(R322) N+ + O3- -> O3 + N, rate: 2e-13 * (300/Tg)^0.5
+(R323) N+ + O4- -> O2 + O2 + N, rate: 1e-13
+(R324) N+ + H- -> N + H, rate: 2e-13 * (300/Tg)^0.5
+(R325) N+ + OH- -> N + OH, rate: 2e-13 * (300/Tg)^0.5
+(R326) N2+ + N2O- -> N2O + N2, rate: 2e-13 * (300/Tg)^0.5
+(R327) N2+ + N2O- -> N2O + N + N, rate: 1e-13
+(R328) N2+ + NO- -> NO + N2, rate: 2e-13 * (300/Tg)^0.5
+(R329) N2+ + NO- -> NO + N + N, rate: 1e-13
+(R330) N2+ + NO2- -> NO2 + N2, rate: 2e-13 * (300/Tg)^0.5
+(R331) N2+ + NO2- -> NO2 + N + N, rate: 1e-13
+(R332) N2+ + NO3- -> NO3 + N2, rate: 2e-13 * (300/Tg)^0.5
+(R333) N2+ + NO3- -> NO3 + N + N, rate: 1e-13
+(R334) N2+ + O- -> O + N + N, rate: 1e-13
+(R335) N2+ + O- -> O + N2, rate: 2e-13 * (300/Tg)^0.5
+(R336) N2+ + O2- -> O2 + N + N, rate: 1e-13
+(R337) N2+ + O2- -> O2 + N2, rate: 2e-13 * (300/Tg)^0.5
+(R338) N2+ + O3- -> O3 + N + N, rate: 1e-13
+(R339) N2+ + O3- -> O3 + N2, rate: 2e-13 * (300/Tg)^0.5
+(R340) N2+ + O4- -> O2 + O2 + N2, rate: 1e-13
+(R341) N2+ + H- -> H + N2, rate: 2e-13 * (300/Tg)^0.5
+(R342) N2+ + H- -> H + N + N, rate: 1e-13
+(R343) N2+ + OH- -> OH + N2, rate: 2e-13 * (300/Tg)^0.5
+(R344) N2+ + OH- -> OH + N + N, rate: 1e-13
+(R345) N2O+ + N2O- -> N2O + N2O, rate: 2e-13 * (300/Tg)^0.5
+(R346) N2O+ + N2O- -> N2O + N2 + O, rate: 1e-13
+(R347) N2O+ + NO- -> NO + N2O, rate: 2e-13 * (300/Tg)^0.5
+(R348) N2O+ + NO- -> NO + N2 + O, rate: 1e-13
+(R349) N2O+ + NO2- -> NO2 + N2O, rate: 2e-13 * (300/Tg)^0.5
+(R350) N2O+ + NO2- -> NO2 + N2 + O, rate: 1e-13
+(R351) N2O+ + NO3- -> NO3 + N2O, rate: 2e-13 * (300/Tg)^0.5
+(R352) N2O+ + NO3- -> NO3 + N2 + O, rate: 1e-13
+(R353) N2O+ + O- -> O + N2O, rate: 2e-13 * (300/Tg)^0.5
+(R354) N2O+ + O- -> O + N2 + O, rate: 1e-13
+(R355) N2O+ + O2- -> O2 + N2O, rate: 2e-13 * (300/Tg)^0.5
+(R356) N2O+ + O2- -> O2 + N2 + O, rate: 1e-13
+(R357) N2O+ + O3- -> O3 + N2O, rate: 2e-13 * (300/Tg)^0.5
+(R358) N2O+ + O3- -> O3 + N2 + O, rate: 1e-13
+(R359) N2O+ + O4- -> O2 + O2 + N2O, rate: 1e-13
+(R360) N2O+ + H- -> H + N2O, rate: 2e-13 * (300/Tg)^0.5
+(R361) N2O+ + H- -> H + N2 + O, rate: 1e-13
+(R362) N2O+ + OH- -> OH + N2O, rate: 2e-13 * (300/Tg)^0.5
+(R363) N2O+ + OH- -> OH + N2 + O, rate: 1e-13
+(R364) N3+ + N2O- -> N2O + N2 + N, rate: 1e-13
+(R365) N3+ + NO- -> NO + N2 + N, rate: 1e-13
+(R366) N3+ + NO2- -> NO2 + N2 + N, rate: 1e-13
+(R367) N3+ + NO3- -> NO3 + N2 + N, rate: 1e-13
+(R368) N3+ + O- -> O + N2 + N, rate: 1e-13
+(R369) N3+ + O2- -> O2 + N2 + N, rate: 1e-13
+(R370) N3+ + O3- -> O3 + N2 + N, rate: 1e-13
+(R371) N3+ + O4- -> O2 + O2 + N + N2, rate: 1e-13
+(R372) N3+ + H- -> H + N2 + N, rate: 1e-13
+(R373) N3+ + OH- -> OH + N2 + N, rate: 1e-13
+(R374) N4+ + N2O- -> N2O + N2 + N2, rate: 1e-13
+(R375) N4+ + NO- -> NO + N2 + N2, rate: 1e-13
+(R376) N4+ + NO2- -> NO2 + N2 + N2, rate: 1e-13
+(R377) N4+ + NO3- -> NO3 + N2 + N2, rate: 1e-13
+(R378) N4+ + O- -> O + N2 + N2, rate: 1e-13
+(R379) N4+ + O2- -> O2 + N2 + N2, rate: 1e-13
+(R380) N4+ + O3- -> O3 + N2 + N2, rate: 1e-13
+(R381) N4+ + O4- -> O2 + O2 + N2 + N2, rate: 1e-13
+(R382) N4+ + H- -> H + N2 + N2, rate: 1e-13
+(R383) N4+ + OH- -> OH + N2 + N2, rate: 1e-13
+(R384) NO+ + N2O- -> N2O + NO, rate: 2e-13 * (300/Tg)^0.5
+(R385) NO+ + N2O- -> N2O + N + O, rate: 1e-13
+(R386) NO+ + NO- -> NO + NO, rate: 2e-13 * (300/Tg)^0.5
+(R387) NO+ + NO- -> NO + N + O, rate: 1e-13
+(R388) NO+ + NO2- -> NO2 + NO, rate: 2e-13 * (300/Tg)^0.5
+(R389) NO+ + NO2- -> NO2 + N + O, rate: 1e-13
+(R390) NO+ + NO3- -> NO3 + NO, rate: 2e-13 * (300/Tg)^0.5
+(R391) NO+ + NO3- -> NO3 + N + O, rate: 1e-13
+(R392) NO+ + O- -> O + N + O, rate: 1e-13
+(R393) NO+ + O- -> O + NO, rate: 2e-13 * (300/Tg)^0.5
+(R394) NO+ + O2- -> O2 + N + O, rate: 1e-13
+(R395) NO+ + O2- -> O2 + NO, rate: 2e-13 * (300/Tg)^0.5
+(R396) NO+ + O3- -> O3 + N + O, rate: 1e-13
+(R397) NO+ + O3- -> O3 + NO, rate: 2e-13 * (300/Tg)^0.5
+(R398) NO+ + O4- -> O2 + O2 + NO, rate: 1e-13
+(R399) NO+ + H- -> H + NO, rate: 2e-13 * (300/Tg)^0.5
+(R400) NO+ + H- -> H + N + O, rate: 1e-13
+(R401) NO+ + OH- -> OH + NO, rate: 2e-13 * (300/Tg)^0.5
+(R402) NO+ + OH- -> OH + N + O, rate: 1e-13
+(R403) NO2+ + N2O- -> N2O + NO2, rate: 2e-13 * (300/Tg)^0.5
+(R404) NO2+ + N2O- -> N2O + N + O2, rate: 1e-13
+(R405) NO2+ + NO- -> NO + NO2, rate: 2e-13 * (300/Tg)^0.5
+(R406) NO2+ + NO- -> NO + N + O2, rate: 1e-13
+(R407) NO2+ + NO2- -> NO2 + NO2, rate: 2e-13 * (300/Tg)^0.5
+(R408) NO2+ + NO2- -> NO2 + N + O2, rate: 1e-13
+(R409) NO2+ + NO3- -> NO3 + NO2, rate: 2e-13 * (300/Tg)^0.5
+(R410) NO2+ + NO3- -> NO3 + N + O2, rate: 1e-13
+(R411) NO2+ + O- -> O + NO2, rate: 2e-13 * (300/Tg)^0.5
+(R412) NO2+ + O- -> O + N + O2, rate: 1e-13
+(R413) NO2+ + O2- -> O2 + NO2, rate: 2e-13 * (300/Tg)^0.5
+(R414) NO2+ + O2- -> O2 + N + O2, rate: 1e-13
+(R415) NO2+ + O3- -> O3 + NO2, rate: 2e-13 * (300/Tg)^0.5
+(R416) NO2+ + O3- -> O3 + N + O2, rate: 1e-13
+(R417) NO2+ + O4- -> O2 + O2 + NO2, rate: 1e-13
+(R418) NO2+ + H- -> H + NO2, rate: 2e-13 * (300/Tg)^0.5
+(R419) NO2+ + H- -> H + N + O2, rate: 1e-13
+(R420) NO2+ + OH- -> OH + NO2, rate: 2e-13 * (300/Tg)^0.5
+(R421) NO2+ + OH- -> OH + N + O2, rate: 1e-13
+(R422) H+ + N2O- -> N2O + H, rate: 2e-13 * (300/Tg)^0.5
+(R423) H+ + NO- -> NO + H, rate: 2e-13 * (300/Tg)^0.5
+(R424) H+ + NO2- -> NO2 + H, rate: 2e-13 * (300/Tg)^0.5
+(R425) H+ + NO3- -> NO3 + H, rate: 2e-13 * (300/Tg)^0.5
+(R426) H+ + O- -> O + H, rate: 2e-13 * (300/Tg)^0.5
+(R427) H+ + O2- -> O2 + H, rate: 2e-13 * (300/Tg)^0.5
+(R428) H+ + O3- -> O3 + H, rate: 2e-13 * (300/Tg)^0.5
+(R429) H+ + O4- -> O2 + O2 + H, rate: 1e-13
+(R430) H+ + H- -> H + H, rate: 2e-13 * (300/Tg)^0.5
+(R431) H+ + OH- -> OH + H, rate: 2e-13 * (300/Tg)^0.5
+(R432) H2+ + N2O- -> N2O + H2, rate: 2e-13 * (300/Tg)^0.5
+(R433) H2+ + N2O- -> N2O + H + H, rate: 1e-13
+(R434) H2+ + NO- -> NO + H2, rate: 2e-13 * (300/Tg)^0.5
+(R435) H2+ + NO- -> NO + H + H, rate: 1e-13
+(R436) H2+ + NO2- -> NO2 + H2, rate: 2e-13 * (300/Tg)^0.5
+(R437) H2+ + NO2- -> NO2 + H + H, rate: 1e-13
+(R438) H2+ + NO3- -> NO3 + H2, rate: 2e-13 * (300/Tg)^0.5
+(R439) H2+ + NO3- -> NO3 + H + H, rate: 1e-13
+(R440) H2+ + O- -> O + H + H, rate: 1e-13
+(R441) H2+ + O- -> O + H2, rate: 2e-13 * (300/Tg)^0.5
+(R442) H2+ + O2- -> O2 + H + H, rate: 1e-13
+(R443) H2+ + O2- -> O2 + H2, rate: 2e-13 * (300/Tg)^0.5
+(R444) H2+ + O3- -> O3 + H + H, rate: 1e-13
+(R445) H2+ + O3- -> O3 + H2, rate: 2e-13 * (300/Tg)^0.5
+(R446) H2+ + O4- -> O2 + O2 + H2, rate: 1e-13
+(R447) H2+ + H- -> H + H2, rate: 2e-13 * (300/Tg)^0.5
+(R448) H2+ + H- -> H + H + H, rate: 1e-13
+(R449) H2+ + OH- -> OH + H2, rate: 2e-13 * (300/Tg)^0.5
+(R450) H2+ + OH- -> OH + H + H, rate: 1e-13
+(R451) H3+ + N2O- -> N2O + H + H2, rate: 1e-13
+(R452) H3+ + NO- -> NO + H + H2, rate: 1e-13
+(R453) H3+ + NO2- -> NO2 + H + H2, rate: 1e-13
+(R454) H3+ + NO3- -> NO3 + H + H2, rate: 1e-13
+(R455) H3+ + O- -> O + H + H2, rate: 1e-13
+(R456) H3+ + O2- -> O2 + H + H2, rate: 1e-13
+(R457) H3+ + O3- -> O3 + H + H2, rate: 1e-13
+(R458) H3+ + O4- -> O2 + O2 + H + H2, rate: 1e-13
+(R459) H3+ + H- -> H + H + H2, rate: 1e-13
+(R460) H3+ + OH- -> OH + H + H2, rate: 1e-13
+(R461) OH+ + N2O- -> N2O + OH, rate: 2e-13 * (300/Tg)^0.5
+(R462) OH+ + N2O- -> N2O + O + H, rate: 1e-13
+(R463) OH+ + NO- -> NO + OH, rate: 2e-13 * (300/Tg)^0.5
+(R464) OH+ + NO- -> NO + O + H, rate: 1e-13
+(R465) OH+ + NO2- -> NO2 + OH, rate: 2e-13 * (300/Tg)^0.5
+(R466) OH+ + NO2- -> NO2 + O + H, rate: 1e-13
+(R467) OH+ + NO3- -> NO3 + OH, rate: 2e-13 * (300/Tg)^0.5
+(R468) OH+ + NO3- -> NO3 + O + H, rate: 1e-13
+(R469) OH+ + O- -> O + O + H, rate: 1e-13
+(R470) OH+ + O- -> O + OH, rate: 2e-13 * (300/Tg)^0.5
+(R471) OH+ + O2- -> O2 + O + H, rate: 1e-13
+(R472) OH+ + O2- -> O2 + OH, rate: 2e-13 * (300/Tg)^0.5
+(R473) OH+ + O3- -> O3 + O + H, rate: 1e-13
+(R474) OH+ + O3- -> O3 + OH, rate: 2e-13 * (300/Tg)^0.5
+(R475) OH+ + O4- -> O2 + O2 + OH, rate: 1e-13
+(R476) OH+ + H- -> H + OH, rate: 2e-13 * (300/Tg)^0.5
+(R477) OH+ + H- -> H + O + H, rate: 1e-13
+(R478) OH+ + OH- -> OH + OH, rate: 2e-13 * (300/Tg)^0.5
+(R479) OH+ + OH- -> OH + O + H, rate: 1e-13
+(R480) H2O+ + N2O- -> N2O + H2O, rate: 2e-13 * (300/Tg)^0.5
+(R481) H2O+ + N2O- -> N2O + OH + H, rate: 1e-13
+(R482) H2O+ + NO- -> NO + H2O, rate: 2e-13 * (300/Tg)^0.5
+(R483) H2O+ + NO- -> NO + OH + H, rate: 1e-13
+(R484) H2O+ + NO2- -> NO2 + H2O, rate: 2e-13 * (300/Tg)^0.5
+(R485) H2O+ + NO2- -> NO2 + OH + H, rate: 1e-13
+(R486) H2O+ + NO3- -> NO3 + H2O, rate: 2e-13 * (300/Tg)^0.5
+(R487) H2O+ + NO3- -> NO3 + OH + H, rate: 1e-13
+(R488) H2O+ + O- -> O + OH + H, rate: 1e-13
+(R489) H2O+ + O- -> O + H2O, rate: 2e-13 * (300/Tg)^0.5
+(R490) H2O+ + O2- -> O2 + OH + H, rate: 1e-13
+(R491) H2O+ + O2- -> O2 + H2O, rate: 2e-13 * (300/Tg)^0.5
+(R492) H2O+ + O3- -> O3 + OH + H, rate: 1e-13
+(R493) H2O+ + O3- -> O3 + H2O, rate: 2e-13 * (300/Tg)^0.5
+(R494) H2O+ + O4- -> O2 + O2 + H2O, rate: 1e-13
+(R495) H2O+ + H- -> H + H2O, rate: 2e-13 * (300/Tg)^0.5
+(R496) H2O+ + H- -> H + OH + H, rate: 1e-13
+(R497) H2O+ + OH- -> OH + H2O, rate: 2e-13 * (300/Tg)^0.5
+(R498) H2O+ + OH- -> OH + OH + H, rate: 1e-13
+(R499) H3O+ + N2O- -> N2O + H2O + H, rate: 1e-13
+(R500) H3O+ + NO- -> NO + H2O + H, rate: 1e-13
+(R501) H3O+ + NO2- -> NO2 + H2O + H, rate: 1e-13
+(R502) H3O+ + NO3- -> NO3 + H2O + H, rate: 1e-13
+(R503) H3O+ + O- -> O + H2O + H, rate: 1e-13
+(R504) H3O+ + O2- -> O2 + H2O + H, rate: 1e-13
+(R505) H3O+ + O3- -> O3 + H2O + H, rate: 1e-13
+(R506) H3O+ + O4- -> O2 + O2 + H2O + H, rate: 1e-13
+(R507) H3O+ + H- -> H + H2O + H, rate: 1e-13
+(R508) H3O+ + OH- -> OH + H2O + H, rate: 1e-13
+(R509) N + N + M -> N2 + M, rate: 8.3e-46 * exp(500/Tg)
+(R510) N + NO -> N2 + O, rate: 2.1e-17 * exp(100/Tg)
+(R511) N + NO2 -> N2O + O, rate: 5.8e-18 * exp(220/Tg)
+(R512) N + NO2 -> N2 + O + O, rate: 9.1e-19
+(R513) N + NO2 -> NO + NO, rate: 6e-19
+(R514) N + NO2 -> N2 + O2, rate: 7e-19
+(R515) N + O + M -> NO + M, rate: 6.3e-45 * exp(140/Tg)
+(R516) N + O2 -> NO + O, rate: 1.5e-17 * exp(-3600/Tg)
+(R517) N + O3 -> NO + O2, rate: 5e-22
+(R518) N + OH -> H + NO, rate: 7.5e-17
+(R519) N + HO2 -> NO + OH, rate: 1.7e-17 * exp(-1000/Tg)
+(R520) N(2D) + N2 -> N + N2, rate: 5e-18 * exp(-1620/Tg)
+(R521) N(2D) + N2O -> N2 + NO, rate: 1.5e-17 * exp(-570/Tg)
+(R522) N(2D) + NO -> N2O, rate: 6e-17
+(R523) N(2D) + NO -> O + N2, rate: 4.5e-17
+(R524) N(2D) + O -> N + O, rate: 7e-19
+(R525) N(2D) + O2 -> NO + O, rate: 1.5e-18 * (Tg/300)^0.5
+(R526) N(2D) + O2 -> NO + O(1D), rate: 6e-18 * (Tg/300)^0.5
+(R527) N2(A 3S) + N2 -> N2 + N2, rate: 2.2e-20
+(R528) N2(A 3S) + N2(A 3S) -> N2(B 3P) + N2, rate: 4e-16
+(R529) N2(A 3S) + N2O -> O + N2 + N2, rate: 8e-17
+(R530) N2(A 3S) + N2O -> NO + N + N2, rate: 8e-17
+(R531) N2(A 3S) + NO2 -> N2 + NO + O, rate: 1.3e-17
+(R532) N2(A 3S) + O2 -> N2 + O + O, rate: 5e-18 * exp(-210/Tg)
+(R533) N2(A 3S) + O2 -> O2(a 1D) + N2, rate: 1e-18
+(R534) N2(A 3S) + N -> N + N2, rate: 5e-17
+(R535) N2(A 3S) + O -> NO + N(2D), rate: 7e-18
+(R536) N2(A 3S) + O -> O(1D) + N2, rate: 2.3e-17
+(R537) N2(A 3S) + H2O -> H + OH + N2, rate: 5e-20
+(R538) N2(B 3P) + N2 -> N2(A 3S) + N2, rate: 5e-17
+(R539) N2(B 3P) -> N2(A 3S), rate: 1.25e5
+(R540) N2(B 3P) + NO -> N2(A 3S) + NO, rate: 2.4e-16
+(R541) N2(B 3P) + O2 -> N2 + O + O, rate: 3e-16
+(R542) N2(B 3P) + H2 -> N2(A 3S) + H2, rate: 2.5e-17
+(R543) O + O + M -> O2 + M, rate: 3.2e-47 * exp(900/Tg)
+(R544) O + O2 + M -> O3 + M, rate: 3.4e-46 * (300/Tg)^1.2
+(R545) O + O3 -> O2 + O2, rate: 8e-18 * exp(-2060/Tg)
+(R546) O + NO + M -> NO2 + M, rate: 1e-43 * (300/Tg)^1.6
+(R547) O + NO2 -> NO + O2, rate: 6.5e-18 * exp(120/Tg)
+(R548) O + NO2 + M -> NO3 + M, rate: 9e-44 * (300/Tg)^2
+(R549) O + NO3 -> O2 + NO2, rate: 1.7e-17
+(R550) O + H + M -> OH + M, rate: 1.62e-44
+(R551) O + OH -> H + O2, rate: 2.2e-17 * exp(-350/Tg)
+(R552) O + H2O2 -> OH + HO2, rate: 3.3e-17 * exp(-2950/Tg)
+(R553) O + HO2 -> OH + O2, rate: 8.3e-17 * exp(-500/Tg)
+(R554) O + HNO -> OH + NO, rate: 5.99e-17
+(R555) O + HNO2 -> NO2 + OH, rate: 2e-17 * exp(-3000/Tg)
+(R556) O(1D) + O2 -> O + O2, rate: 6.4e-18 * exp(67/Tg)
+(R557) O(1D) + O -> O + O, rate: 8e-18
+(R558) O(1D) + O2(a 1D) -> O + O2, rate: 1e-17
+(R559) O(1D) + O2 -> O + O2(a 1D), rate: 1e-18
+(R560) O(1D) + O3 -> O + O + O2, rate: 1.2e-16
+(R561) O(1D) + O3 -> O2 + O2, rate: 1.2e-16
+(R562) O(1D) + N2 -> O + N2, rate: 1.8e-17 * exp(107/Tg)
+(R563) O(1D) + N2 + M -> N2O + M, rate: 9e-49
+(R564) O(1D) + N2O -> N2 + O2, rate: 4.4e-17
+(R565) O(1D) + N2O -> NO + NO, rate: 7.2e-17
+(R566) O(1D) + NO -> O + NO, rate: 4e-17
+(R567) O(1D) + NO2 -> NO + O2, rate: 1.4e-16
+(R568) O(1D) + H2 -> OH + H, rate: 1.1e-16
+(R569) O(1D) + H2O -> OH + OH, rate: 2.2e-16
+(R570) O2(a 1D) + O2 -> O2 + O2, rate: 3.8e-24 * exp(-205/Tg)
+(R571) O2(a 1D) + O3 -> O + O2 + O2, rate: 5.2e-17 * exp(-2840/Tg)
+(R572) O2(a 1D) + M -> O2 + M, rate: 8e-27
+(R573) O2(a 1D) + NO -> O2 + NO, rate: 2.5e-17
+(R574) O2(a 1D) + N2 -> O2 + N2, rate: 1.5e-24
+(R575) O3 + NO -> NO2 + O2, rate: 1.8e-18 * exp(-1370/Tg)
+(R576) O3 + NO2 -> NO3 + O2, rate: 1.4e-19 * exp(-2470/Tg)
+(R577) O3 + M -> O + O2 + M, rate: 3.92e-16 * exp(-11400/Tg)
+(R578) O3 + H -> OH + O2, rate: 2.8e-17 * (Tg/300)^0.75
+(R579) O3 + OH -> HO2 + O2, rate: 1.6e-18 * exp(-1000/Tg)
+(R580) O3 + HO2 -> OH + O2 + O2, rate: 1.4e-20 * exp(-600/Tg)
+(R581) NO + NO2 + M -> N2O3 + M, rate: 3.09e-46 * (300/Tg)^7.7
+(R582) NO + NO3 -> NO2 + NO2, rate: 1.8e-17 * exp(110/Tg)
+(R583) NO + OH + M -> HNO2 + M, rate: 7.4e-43 * (300/Tg)^2.4
+(R584) NO + H + M -> HNO + M, rate: 1e-44 * exp(300/Tg)
+(R585) NO + HO2 -> OH + NO2, rate: 3.4e-18 * exp(270/Tg)
+(R586) NO + HO2 -> O2 + HNO, rate: 3.3e-19 * exp(-1000/Tg)
+(R587) NO2 + NO2 + M -> N2O4 + M, rate: 1.17e-45 * (300/Tg)^3.8
+(R588) NO2 + NO3 + M -> N2O5 + M, rate: 2.8e-42 * (300/Tg)^3.5
+(R589) NO2 + NO3 -> NO2 + NO + O2, rate: 2.3e-19 * exp(-1600/Tg)
+(R590) NO2 + H -> OH + NO, rate: 1.47e-16
+(R591) NO2 + OH + M -> HNO3 + M, rate: 2.2e-42 * (300/Tg)^2.9
+(R592) NO3 + NO3 -> NO2 + NO2 + O2, rate: 5e-18 * exp(-3000/Tg)
+(R593) NO3 + H -> OH + NO2, rate: 5.8e-16 * exp(-750/Tg)
+(R594) NO3 + OH -> HO2 + NO2, rate: 2e-17
+(R595) NO3 + HO2 -> NO2 + OH + O2, rate: 4.8e-18
+(R596) NO3 + HO2 -> HNO3 + O2, rate: 9.2e-19
+(R597) N2O3 + M -> NO + NO2 + M, rate: 1.03e-16 * exp(-2628/Tg)
+(R598) N2O4 + M -> NO2 + NO2 + M, rate: 1.09e-13 * exp(-4952/Tg)
+(R599) N2O5 + M -> NO2 + NO3 + M, rate: 1e-9 * (300/Tg)^3.5 * exp(-11000/Tg)
+(R600) H + O2 + M -> HO2 + M, rate: 5.4e-44 * (Tg/300)^-1.8
+(R601) H + H + M -> H2 + M, rate: 1.8e-42 / Tg
+(R602) H + OH + M -> H2O + M, rate: 6.1e-38 / Tg^2
+(R603) H + H2O2 -> OH + H2O, rate: 1.69e-17 * exp(-1800/Tg)
+(R604) H + H2O2 -> HO2 + H2, rate: 2.8e-18 * exp(-1900/Tg)
+(R605) H + HO2 -> H2 + O2, rate: 5.6e-18
+(R606) H + HO2 -> O + H2O, rate: 2.4e-18
+(R607) H + HO2 -> OH + OH, rate: 4.2e-16 * exp(-950/Tg)
+(R608) H + HNO -> NO + H2, rate: 3e-17 * exp(-500/Tg)
+(R609) H + HNO2 -> NO2 + H2, rate: 2e-17 * exp(-3700/Tg)
+(R610) H + HNO3 -> NO2 + H2O, rate: 1.39e-20 * (Tg/298)^3.29 * exp(-3160/Tg)
+(R611) H2 + OH -> H + H2O, rate: 3.2e-17 * exp(-2600/Tg)
+(R612) OH + OH -> O + H2O, rate: 8.8e-18 * exp(-503/Tg)
+(R613) OH + OH + M -> H2O2 + M, rate: 6.9e-43 * (Tg/300)^-0.8
+(R614) OH + HO2 -> O2 + H2O, rate: 4.8e-17 * exp(250/Tg)
+(R615) OH + H2O2 -> HO2 + H2O, rate: 2.9e-18 * exp(-160/Tg)
+(R616) OH + HNO -> NO + H2O, rate: 8e-17 * exp(-500/Tg)
+(R617) OH + HNO2 -> NO2 + H2O, rate: 1.8e-17 * exp(-390/Tg)
+(R618) OH + HNO3 -> NO3 + H2O, rate: 1.5e-20 * exp(650/Tg)
+(R619) HO2 + HO2 -> H2O2 + O2, rate: 2.2e-19 * exp(600/Tg)
+(R620) HNO + O2 -> NO + HO2, rate: 5.25e-18 * exp(-1510/Tg)
+(R621) HNO + O2 -> NO2 + OH, rate: 1.66e-21
+(R622) HNO + HNO -> N2O + H2O, rate: 1.4e-21 * exp(-1600/Tg)
+(R623) HNO2 + HNO2 -> NO + NO2 + H2O, rate: 1e-26
+(R624) HNO2 + HNO3 -> NO2 + NO2 + H2O, rate: 1.6e-23
