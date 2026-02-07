@@ -39,11 +39,13 @@ void printProgramDescription(void)
   cout << "**********************************************" << endl;
   cout << "*                                            *" << endl;
   cout << "* Felipe Soberon (felipe.soberon@gmail.com)  *" << endl;
-  cout << "* 2023                                       *" << endl;
+  cout << "* 2026                                       *" << endl;
   cout << "*                                            *" << endl;
   cout << "* Global_Model_2.1 of atmospheric pressure   *" << endl;
   cout << "* plasma discharge in (humid) air;           *" << endl;
-  cout << "* using Sakiyama et al., 2012 reaction data. *" << endl;
+  cout << "* using Sakiyama et al., 2012 (R1-R624)      *" << endl;
+  cout << "* and Peng et al., 2022 (R625-R673)          *" << endl;
+  cout << "* reaction data.                             *" << endl;
   cout << "*                                            *" << endl;
   cout << "**********************************************" << endl;
   
