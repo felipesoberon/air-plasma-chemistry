@@ -36,6 +36,9 @@ class AirGMGui:
         self.last_csv_mtime: float | None = None
         self.last_csv_size: int | None = None
         self.latest_species_values: list[float] = []
+        self.latest_total_air_density: float | None = None
+        self.latest_positive_ions_sum: float = 0.0
+        self.latest_negative_ions_sum: float = 0.0
 
         self.plot_times: list[float] = []
         self.plot_data: dict[int, list[float]] = {i: [] for i in range(1, NO_SPECIES + 1)}
@@ -280,7 +283,8 @@ class AirGMGui:
                 y_val = series[idx]
                 if not math.isnan(y_val) and y_val > 0.0:
                     x_val = self.plot_times[idx]
-                    label = SPECIES_FORMULAS[key] if 1 <= key <= NO_SPECIES else line.get_label()
+                    base_label = SPECIES_FORMULAS[key] if 1 <= key <= NO_SPECIES else line.get_label()
+                    label = f"{base_label} ({self._latest_ppb_string(key)} PPB)"
                     candidates.append((key, x_val, y_val, label, line.get_color()))
                     break
 
@@ -321,6 +325,40 @@ class AirGMGui:
                 clip_on=True,
             )
             self.endpoint_label_artists.append(text)
+
+    @staticmethod
+    def _format_ppb_three_sig(value: float) -> str:
+        abs_value = abs(value)
+        if abs_value == 0.0:
+            return "0"
+
+        if 0.1 <= abs_value <= 10000.0:
+            decimals = max(0, 2 - int(math.floor(math.log10(abs_value))))
+            decimal = f"{value:.{decimals}f}".rstrip("0").rstrip(".")
+            return decimal
+
+        exponent3 = int(math.floor(math.log10(abs_value) / 3.0) * 3)
+        mantissa = value / (10 ** exponent3)
+        mantissa_decimals = max(0, 2 - int(math.floor(math.log10(abs(mantissa)))))
+        mantissa_str = f"{mantissa:.{mantissa_decimals}f}"
+        return f"{mantissa_str}E{exponent3:+d}"
+
+    def _latest_ppb_string(self, key: int) -> str:
+        total = self.latest_total_air_density
+        if total is None or total <= 0.0:
+            return "n/a"
+
+        if 1 <= key <= NO_SPECIES and len(self.latest_species_values) >= NO_SPECIES:
+            value = self.latest_species_values[key - 1]
+        elif key == SUM_POSITIVE_IONS_KEY:
+            value = self.latest_positive_ions_sum
+        elif key == SUM_NEGATIVE_IONS_KEY:
+            value = self.latest_negative_ions_sum
+        else:
+            return "n/a"
+
+        ppb_value = (value / total) * 1.0e9
+        return self._format_ppb_three_sig(ppb_value)
 
     @staticmethod
     def _windows_path_to_wsl(path: Path) -> str:
@@ -421,6 +459,9 @@ class AirGMGui:
     def _clear_plot_data(self) -> None:
         self.plot_times.clear()
         self.latest_species_values = []
+        self.latest_total_air_density = None
+        self.latest_positive_ions_sum = 0.0
+        self.latest_negative_ions_sum = 0.0
         for key in self.lines:
             self.plot_data[key].clear()
             self.lines[key].set_data([], [])
@@ -482,6 +523,11 @@ class AirGMGui:
 
         last = rows[-1]
         self.latest_species_values = [last[i - 1] for i in range(1, NO_SPECIES + 1)]
+        self.latest_total_air_density = (
+            self.latest_species_values[50] + self.latest_species_values[51] + self.latest_species_values[52]
+        )
+        self.latest_positive_ions_sum = sum(last[i - 1] for i in POSITIVE_ION_INDICES)
+        self.latest_negative_ions_sum = sum(last[i - 1] for i in NEGATIVE_ION_INDICES)
         current_time = last[53]
         self.current_time_var.set(f"t = {current_time:.6g} s")
 
