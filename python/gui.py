@@ -44,6 +44,7 @@ class AirGMGui:
 
         self.lines = {}
         self.species_vars: dict[int, tk.BooleanVar] = {}
+        self.endpoint_label_artists = []
 
         self._build_layout()
         self._init_plot()
@@ -254,7 +255,72 @@ class AirGMGui:
 
         self.show_all_var.set(visible_count == len(self.lines))
         self._autoscale_axes()
+        self._update_endpoint_labels()
         self.canvas.draw_idle()
+
+    def _clear_endpoint_labels(self) -> None:
+        for artist in self.endpoint_label_artists:
+            artist.remove()
+        self.endpoint_label_artists.clear()
+
+    def _update_endpoint_labels(self) -> None:
+        self._clear_endpoint_labels()
+        if not self.plot_times:
+            return
+
+        candidates = []
+        for key, line in self.lines.items():
+            if not line.get_visible():
+                continue
+            series = self.plot_data.get(key)
+            if not series:
+                continue
+
+            for idx in range(len(series) - 1, -1, -1):
+                y_val = series[idx]
+                if not math.isnan(y_val) and y_val > 0.0:
+                    x_val = self.plot_times[idx]
+                    label = SPECIES_FORMULAS[key] if 1 <= key <= NO_SPECIES else line.get_label()
+                    candidates.append((key, x_val, y_val, label, line.get_color()))
+                    break
+
+        if not candidates:
+            return
+
+        candidates.sort(key=lambda item: item[2])
+        y_min_px = self.ax.bbox.ymin + 4.0
+        y_max_px = self.ax.bbox.ymax - 4.0
+        min_gap_px = 11.0
+        dpi = self.figure.dpi
+
+        adjusted_display_y: list[float] = []
+        for _, x_val, y_val, _, _ in candidates:
+            display_y = self.ax.transData.transform((x_val, y_val))[1]
+            display_y = max(y_min_px, min(y_max_px, display_y))
+            if adjusted_display_y:
+                display_y = max(display_y, adjusted_display_y[-1] + min_gap_px)
+                display_y = min(display_y, y_max_px)
+            adjusted_display_y.append(display_y)
+
+        for idx in range(len(adjusted_display_y) - 2, -1, -1):
+            if adjusted_display_y[idx + 1] - adjusted_display_y[idx] < min_gap_px:
+                adjusted_display_y[idx] = max(y_min_px, adjusted_display_y[idx + 1] - min_gap_px)
+
+        for (key, x_val, y_val, label, color), final_display_y in zip(candidates, adjusted_display_y):
+            raw_display_y = self.ax.transData.transform((x_val, y_val))[1]
+            y_offset_points = (final_display_y - raw_display_y) * 72.0 / dpi
+            text = self.ax.annotate(
+                label,
+                xy=(x_val, y_val),
+                xytext=(6.0, y_offset_points),
+                textcoords="offset points",
+                ha="left",
+                va="center",
+                fontsize=8,
+                color=color,
+                clip_on=True,
+            )
+            self.endpoint_label_artists.append(text)
 
     @staticmethod
     def _windows_path_to_wsl(path: Path) -> str:
@@ -358,6 +424,7 @@ class AirGMGui:
         for key in self.lines:
             self.plot_data[key].clear()
             self.lines[key].set_data([], [])
+        self._clear_endpoint_labels()
 
         self.current_time_var.set("t = 0 s")
         self.current_metric_var.set("max rel dC/C = 0")
@@ -442,6 +509,7 @@ class AirGMGui:
             self._apply_latest_presence_filter(show_nonzero=False)
 
         self._autoscale_axes()
+        self._update_endpoint_labels()
         self.canvas.draw_idle()
 
     def _autoscale_axes(self) -> None:
