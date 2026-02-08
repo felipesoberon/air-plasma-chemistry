@@ -35,6 +35,7 @@ class AirGMGui:
         self.running = False
         self.last_csv_mtime: float | None = None
         self.last_csv_size: int | None = None
+        self.latest_species_values: list[float] = []
 
         self.plot_times: list[float] = []
         self.plot_data: dict[int, list[float]] = {i: [] for i in range(1, NO_SPECIES + 1)}
@@ -74,6 +75,8 @@ class AirGMGui:
         self.metric_max_var = tk.StringVar()
 
         self.show_all_var = tk.BooleanVar(value=False)
+        self.show_latest_nonzero_var = tk.BooleanVar(value=False)
+        self.show_latest_zero_var = tk.BooleanVar(value=False)
         self.current_time_var = tk.StringVar(value="t = 0 s")
         self.current_metric_var = tk.StringVar(value="max rel dC/C = 0")
         self.current_dt_var = tk.StringVar(value="dt = n/a")
@@ -116,6 +119,18 @@ class AirGMGui:
             text="Show all species",
             variable=self.show_all_var,
             command=self._toggle_show_all,
+        ).pack(anchor="w", pady=(0, 4))
+        ttk.Checkbutton(
+            species_frame,
+            text="Show non-zero at latest time",
+            variable=self.show_latest_nonzero_var,
+            command=self._toggle_show_latest_nonzero,
+        ).pack(anchor="w", pady=(0, 2))
+        ttk.Checkbutton(
+            species_frame,
+            text="Show zero at latest time",
+            variable=self.show_latest_zero_var,
+            command=self._toggle_show_latest_zero,
         ).pack(anchor="w", pady=(0, 4))
 
         grid_body = ttk.Frame(species_frame)
@@ -193,8 +208,40 @@ class AirGMGui:
 
     def _toggle_show_all(self) -> None:
         value = self.show_all_var.get()
+        self.show_latest_nonzero_var.set(False)
+        self.show_latest_zero_var.set(False)
         for var in self.species_vars.values():
             var.set(value)
+        self._update_line_visibility()
+
+    def _toggle_show_latest_nonzero(self) -> None:
+        if self.show_latest_nonzero_var.get():
+            self.show_latest_zero_var.set(False)
+            self._apply_latest_presence_filter(show_nonzero=True)
+            return
+        self._update_line_visibility()
+
+    def _toggle_show_latest_zero(self) -> None:
+        if self.show_latest_zero_var.get():
+            self.show_latest_nonzero_var.set(False)
+            self._apply_latest_presence_filter(show_nonzero=False)
+            return
+        self._update_line_visibility()
+
+    def _apply_latest_presence_filter(self, show_nonzero: bool) -> None:
+        if not self.latest_species_values:
+            self.status_var.set("No data yet for latest-time species filter")
+            if show_nonzero:
+                self.show_latest_nonzero_var.set(False)
+            else:
+                self.show_latest_zero_var.set(False)
+            self._update_line_visibility()
+            return
+
+        for i in range(1, NO_SPECIES + 1):
+            value = self.latest_species_values[i - 1]
+            is_nonzero = value > 0.0
+            self.species_vars[i].set(is_nonzero if show_nonzero else not is_nonzero)
         self._update_line_visibility()
 
     def _update_line_visibility(self) -> None:
@@ -307,6 +354,7 @@ class AirGMGui:
 
     def _clear_plot_data(self) -> None:
         self.plot_times.clear()
+        self.latest_species_values = []
         for key in self.lines:
             self.plot_data[key].clear()
             self.lines[key].set_data([], [])
@@ -366,6 +414,7 @@ class AirGMGui:
             self.lines[key].set_data(self.plot_times, self.plot_data[key])
 
         last = rows[-1]
+        self.latest_species_values = [last[i - 1] for i in range(1, NO_SPECIES + 1)]
         current_time = last[53]
         self.current_time_var.set(f"t = {current_time:.6g} s")
 
@@ -386,6 +435,11 @@ class AirGMGui:
         else:
             self.current_metric_var.set("max rel dC/C = 0")
             self.current_dt_var.set("dt = n/a")
+
+        if self.show_latest_nonzero_var.get():
+            self._apply_latest_presence_filter(show_nonzero=True)
+        elif self.show_latest_zero_var.get():
+            self._apply_latest_presence_filter(show_nonzero=False)
 
         self._autoscale_axes()
         self.canvas.draw_idle()
