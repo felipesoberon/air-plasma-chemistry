@@ -126,7 +126,9 @@ See `documentation/README.org` (or `documentation/README.html`) for detailed mod
 
 Reactions R625--R673 use electron-impact rate coefficients that depend on electron temperature rather than analytical formulas. These rates were obtained as follows:
 
-1. **Cross-section data** from the LXCat database (IST-Lisbon and Morgan sets) for e + H2O, e + N2, and e + O2 collisions were used as input to the BOLSIG+ Boltzmann equation solver (v07/2024).
+Important runtime scope: the Peng reaction set (R625--R673) is intended to run only during early simulation time, up to `1E-4 s`.
+
+1. **Cross-section data** from the LXCat database (IST-Lisbon and Morgan sets) for e + H2O, e + N2, and e + O2 collisions were used as input to the BOLSIG+ Boltzmann equation solver (v07/2024), available at `https://www.bolsig.laplace.univ-tlse.fr/download.html`.
 2. **BOLSIG+** solves the electron energy distribution function (EEDF) for a range of reduced electric fields and outputs rate coefficients as a function of mean electron energy.
 3. The resulting rate coefficients (m3/s) vs electron temperature (eV) are stored in `bolsigplus072024-win/02_output/rates_Peng.csv` (40 data points, 44 reaction columns).
 4. At runtime, the C++ model **loads this CSV once** and obtains rate coefficients by **linear interpolation** on Te (eV), clamping to the table bounds.
