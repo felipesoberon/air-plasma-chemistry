@@ -10,7 +10,7 @@ class species
 {
  private:
 
-  const static int maxNoReactions = 624; 
+  const static int maxNoReactions = 673; 
   string formula;
   double density;
   constexpr static double minimumDensity = 1.0E1;

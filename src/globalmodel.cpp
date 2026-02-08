@@ -150,7 +150,10 @@ void globalmodel::setReactionRates(void)
   int j;
   for (j=1;  j<=NoReactions; j++)
     {
-      REACTION[j].setReactionRate(j, gasTemperatureKelvin, electronTemperatureKelvin);
+      if (simulationTime > 1E-4 && j >= 625)
+	REACTION[j].setReactionRate(0, gasTemperatureKelvin, electronTemperatureKelvin);
+      else
+	REACTION[j].setReactionRate(j, gasTemperatureKelvin, electronTemperatureKelvin);
     }
 }
 
@@ -420,6 +423,8 @@ void globalmodel::processMainLoop(void)
 	  cout << simulationTime<< "\t";
 	  cout << stepCount << "\t";
 	  cout << electronTemperatureKelvin;
+	  cout << "\t";
+	  cout << dt;
 	  cout << endl;
 	}
       simulationTime = simulationTime + dt;
@@ -447,6 +452,8 @@ void globalmodel::processMainLoop(void)
 	  cout << simulationTime<< "\t";
 	  cout << stepCount << "\t";
 	  cout << electronTemperatureKelvin;
+	  cout << "\t";
+	  cout << dt;
 	  cout << endl;
 	}		
       simulationTime = simulationTime + dt;
