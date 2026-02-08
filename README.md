@@ -35,8 +35,8 @@ Supported options:
 - `-RH <percent>` relative humidity in % (preferred humidity input)
 - `-[H2O] <m^-3>` water concentration (alternative humidity input)
 - `-plasmatime <s>` plasma pulse duration
-- `-metricmin <value>` adaptive dt lower relative-change limit (default `0.05`)
-- `-metricmax <value>` adaptive dt upper relative-change limit (default `0.10`)
+- `-metricmin <value>` adaptive dt lower relative-change limit (default `0.01`)
+- `-metricmax <value>` adaptive dt upper relative-change limit (default `0.05`)
 
 Examples:
 
@@ -55,6 +55,10 @@ Fixed dt:
 Notes:
 - If `output.csv` exists, the solver resumes from its last data row.
 - Species density floor is `10 m^-3` in the current C++ model.
+- Adaptive metric definition: at each step, the solver computes `max(|deltaDensity/currentDensity|)` across updated species with `currentDensity > 0`.
+- Adaptive dt rule (when `-dt` is not set): if metric `> metricmax`, `dt` is halved; if metric `< metricmin`, `dt` is doubled.
+- With the default limits (`metricmin = 0.01`, `metricmax = 0.05`), the adaptive controller drives the step size so the largest per-step fractional concentration change among species stays in an approximate 1% to 5% band.
+- In practice, this keeps concentration updates neither too large nor too small, which improves numerical stability and helps avoid overflow/underflow behavior.
 
 ## Python interface
 
