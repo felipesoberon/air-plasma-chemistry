@@ -1,4 +1,4 @@
-# airGM
+# air-plasma-chemistry
 
 A zero-dimensional plasma chemistry model for humid air discharge at atmospheric pressure. The model tracks 53 species and 673 reactions: 624 from Sakiyama et al. (2012) plus 49 electron-impact reactions (R625--R673) from Peng et al. (2022) whose rate coefficients are computed from cross-section data using the BOLSIG+ Boltzmann equation solver.
 
@@ -121,6 +121,7 @@ Simulation data are written to `output.csv`.
 
 ## Documentation
 See `documentation/README.org` (or `documentation/README.html`) for detailed model notes.
+Most content in `documentation/` is primarily for an earlier model version that used only the Sakiyama et al. reaction set.
 
 ## BOLSIG+ rate coefficients (Peng reactions)
 
