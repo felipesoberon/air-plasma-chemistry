@@ -9,9 +9,9 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 SOLVER="${REPO_ROOT}/src/airGM2.1"
 OUTPUT_DIR="${SCRIPT_DIR}/outputs"
 
-TE_EV="5.0"
+TE_EV="4.8"
 TOTAL_TIME_S="0.1"
-RH_VALUES=(0 25 50 75 100)
+RH_VALUES=(0 10 20 30 40 50 60 70 80 90 100)
 
 mkdir -p "${OUTPUT_DIR}"
 

@@ -110,7 +110,8 @@ def main() -> None:
 
     ax.set_xlabel("Relative Humidity [%]")
     ax.set_ylabel("Final Concentration [PPB]")
-    ax.set_title("Top 10 Species by Final PPB (excluding N2, O2, H2O) | Te=5.0 eV, totaltime=0.1 s")
+    ax.set_title("Top 10 Species by Final PPB (excluding N2, O2, H2O) | Te=4.8 eV, totaltime=0.1 s")
+    ax.set_xticks(list(range(0, 101, 10)))
     ax.grid(True, alpha=0.3)
     ax.legend(loc="best")
     fig.tight_layout()
